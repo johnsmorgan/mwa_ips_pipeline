@@ -1,9 +1,7 @@
-#!/bin/bash
+# NB this script is not included in the makefile and must be run separately!
 
-#stilts tmatch2 documentation
-# http://www.star.bris.ac.uk/~mbt/stilts/sun256/tmatch2.html
-#full list of cmd's ('addcol' etc.)
-# http://www.star.bris.ac.uk/~mbt/stilts/sun256/pipes.html
+# take standard GLEAM catalogue and produce peak fluxes for IPS bands
+# delete almost all columns
 
 table_in=/data/catalogs/GLEAM.fits#2
 table_out=gleam_ips_bands.fits

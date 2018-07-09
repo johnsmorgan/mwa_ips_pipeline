@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# NB this script is not included in the makefile and must be included separately!
+# NB this script is not included in the makefile and must be run separately!
 
 # Produce a catalogue of sources for ionospheric/absolute flux calibration
 # With the following characteristics

@@ -1,5 +1,5 @@
-#!/bin/bash
-#tidy up continuum catalogue, rejecting anything within 5 degrees of the Sun
+# Tidy up continuum catalogue, rejecting anything within 5 degrees of the Sun
+# FIXME sun exclusion doesn't work
 stilts tmatch2 \
 	in1=$1 \
 	in2=$3 \
