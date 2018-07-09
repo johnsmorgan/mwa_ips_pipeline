@@ -3,13 +3,10 @@ import numpy as np
 from astropy.io import fits
 import h5py
 
-FITS_OUT="%s_%s%s_moment%d.fits"
-POLS=['XX', 'YY']
-
 parser = OptionParser(usage = "usage:" +
     """
     python apply_beam.py \
-               hdf5_file_in.h5py fitsfile_in.fits fitsfile_out.fits -fr
+               hdf5_file_in.h5py fitsfile_in.fits fitsfile_out.fits [-fr]
     """)
 parser.add_option("-f", "--freq", default=None, dest="freq", help="freq")
 parser.add_option("-r", "--reverse", action='store_true', dest="reverse", help="remove an already-applied primary beam correction")
