@@ -1,6 +1,7 @@
 """
 Plot RBF solution given matched file
-FIXME read beam from fits file (dependency on fits file)
+FIXME Write ellipse parameters out to same (or separate) file.
+FIXME combine into a single plot file?
 """
 import os, sys
 import numpy as np
