@@ -20,26 +20,38 @@ from scipy.interpolate import LSQBivariateSpline, SmoothBivariateSpline
 
 LIM={'121-132': (-3.5, 3.5), '057-068': (-7.0, 7.0)}
 
+ 
 votable = parse(sys.argv[1])
+root=os.path.splitext(sys.argv[1])[0]
 freq=sys.argv[2]
 fitsfile=sys.argv[3]
 format=sys.argv[4]
+# 1147313992_121-132_selfcal-I_cal.vot 121-132 1147313992_121-132_selfcal-I.fits .png
+#votable = parse('1147313992_121-132_selfcal-I_cal.vot')
+#root=os.path.splitext('1147307144_121-132_selfcal-I_cal.vot')[0]
+#freq='121-132'
+#fitsfile='1147313992_121-132_selfcal-I.fits'
+#format='.png'
 table = votable.get_first_table()
-root=os.path.splitext(sys.argv[1])[0]
 
 header=fits.open(fitsfile)[0].header
 bmaj, bmin, bpa = 60*header['BMAJ'], 60*header['BMIN'], header['BPA']
 
 #select those sources with simple morphology which is detected in both lo and hi
 
-ion_map = table.array[~table.array.mask['ra_cat'] & ~table.array['complex']]
+if 'complex' in table.array.dtype.names:
+    simple = ~table.array['complex']
+else:
+    simple = np.ones(len(table.array), dtype=np.bool)
+
+ion_map = table.array[~table.array.mask['ra_cat'] & simple]
 
 p = np.stack((Longitude(ion_map['ra_cat']*u.deg, wrap_angle=180*u.deg),
               ion_map['dec_cat']), axis=-1)
 q = np.stack((Longitude(ion_map['ra']*u.deg, wrap_angle=180*u.deg),
               ion_map['dec']), axis=-1)
 
-vlss_complex = table.array[~table.array.mask['ra_cat'] & table.array['complex']]
+vlss_complex = table.array[~table.array.mask['ra_cat'] & ~simple]
 
 pc = np.stack((np.where(vlss_complex['ra_cat'] > 180, vlss_complex['ra_cat']-360, vlss_complex['ra_cat']),
               vlss_complex['dec_cat']), axis=-1)
@@ -92,6 +104,7 @@ plt.axes().set_aspect('equal')
 ax.set_xlabel("RA (degrees)")
 ax.set_ylabel("Decl. (degrees)")
 plt.savefig("%s_map%s" % (root, format))
+#plt.show()
 
 #FIXME cut off a certain distance from the centre of the image?
 #can we get the primary beam correction factor for each source and filter on that???
