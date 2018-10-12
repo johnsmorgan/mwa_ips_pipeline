@@ -34,7 +34,7 @@ parser.add_option("--ra_in", default="ra", dest="ra_in", help="name of RA column
 parser.add_option("--de_in", default="dec", dest="dec_in", help="name of Decl. column in input file")
 parser.add_option("--ra_out", default="ra_corr", dest="ra_out", help="name of RA column in output file")
 parser.add_option("--de_out", default="dec_corr", dest="dec_out", help="name of Decl. column in output file")
-parser.add_option("--cat_out", default=None, dest="cat_out", help="name of output catalog")
+parser.add_option("-o", "--cat_out", default=None, dest="cat_out", help="name of output catalog")
 parser.add_option("--cat_out_fmt", default='votable', dest="cat_fmt", help="format of output catalog")
 parser.add_option("--alpha", default=2.0, dest="alpha", type="float", help="RBF alpha (default=%default)")
 parser.add_option("--reverse", dest="reverse", action="store_true", help="Reverse correction (e.g. make astrometrically catalogue match distorted image)")
@@ -69,6 +69,8 @@ dvc = np.zeros(pc.shape)
 for i in range(len(pc)):
     v = pc[i]
     dvc[i] = transform_rbf(q, p, v, opts.alpha, opts.reverse)
+
+in_table = in_table.to_table()
 in_table[opts.ra_out] = Longitude(dvc[:, 0]*u.deg, wrap_angle=360*u.deg)
 in_table[opts.dec_out] = dvc[:, 1]*u.deg
 in_table.write(opts.cat_out, format=opts.cat_fmt)
