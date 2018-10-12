@@ -38,8 +38,8 @@ parser.add_option("--cat_out", default=None, dest="cat_out", help="name of outpu
 parser.add_option("--cat_out_fmt", default='votable', dest="cat_fmt", help="format of output catalog")
 parser.add_option("--alpha", default=2.0, dest="alpha", type="float", help="RBF alpha (default=%default)")
 parser.add_option("--reverse", dest="reverse", action="store_true", help="Reverse correction (e.g. make astrometrically catalogue match distorted image)")
-opts, args = parser.parse_args()
 
+opts, args = parser.parse_args()
 # read in master table
 map_table = Table.read(args[0])
 
@@ -49,7 +49,7 @@ if opts.cat_out is None:
     opts.cat_out = in_path[0]+"_corr"+in_path[1]
 
 #select those sources with simple morphology which is detected in both lo and hi
-if opts.bad in table.array.dtype.names:
+if opts.bad in map_table.array.dtype.names:
     simple = ~map_table.array[opts.bad]
 else:
     simple = np.ones(len(map_table.array), dtype=np.bool)
