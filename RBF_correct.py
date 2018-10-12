@@ -3,7 +3,7 @@ import os
 import matplotlib
 import numpy as np
 from numpy import linalg as la
-from astropy.table import Table
+from astropy.io.votable import parse
 from astropy.coordinates import Longitude
 from astropy import units as u
 from optparse import OptionParser
@@ -41,9 +41,9 @@ parser.add_option("--reverse", dest="reverse", action="store_true", help="Revers
 
 opts, args = parser.parse_args()
 # read in master table
-map_table = Table.read(args[0])
+map_table = parse(args[0]).get_first_table()
 
-in_table = Table.read(args[1])
+in_table = parse(args[1]).get_first_table()
 if opts.cat_out is None:
     in_path = os.path.splitext(args[1])
     opts.cat_out = in_path[0]+"_corr"+in_path[1]
@@ -54,15 +54,15 @@ if opts.bad in map_table.array.dtype.names:
 else:
     simple = np.ones(len(map_table.array), dtype=np.bool)
 
-ion_map = map_table[~map_table.mask[opts.ra_cat] & simple]
+ion_map = map_table.array[~map_table.array.mask[opts.ra_cat] & simple]
 
 p = np.stack((Longitude(ion_map[opts.ra_cat]*u.deg, wrap_angle=180*u.deg),
               ion_map[opts.dec_cat]), axis=-1)
 q = np.stack((Longitude(ion_map[opts.ra_raw]*u.deg, wrap_angle=180*u.deg),
               ion_map[opts.ra_raw]), axis=-1)
 
-pc = np.stack((Longitude(in_table[opts.ra_in], wrap_angle=180*u.deg, unit=u.deg),
-              in_table[opts.dec_in]), axis=-1)
+pc = np.stack((Longitude(in_table.array[opts.ra_in], wrap_angle=180*u.deg, unit=u.deg),
+              in_table.array[opts.dec_in]), axis=-1)
 
 # transform points
 dvc = np.zeros(pc.shape)
