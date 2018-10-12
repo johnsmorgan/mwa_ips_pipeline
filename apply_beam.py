@@ -1,7 +1,7 @@
 from optparse import OptionParser #NB zeus does not have argparse!
 import numpy as np
 from astropy.io import fits
-import h5py
+from image_stack import ImageStack
 
 parser = OptionParser(usage = "usage:" +
     """
@@ -21,15 +21,15 @@ if opts.freq is not None:
 else:
     group = '/'
 
-df = h5py.File(hdf5_in, 'r')
-beam = self.group['beam'][..., 0, 0] # last two dimensions are frequency and time
+df = ImageStack(hdf5_in, freq='121-132')
+beam = df.group['beam'][..., 0, 0] # last two dimensions are frequency and time
 hdus = fits.open(fits_in)
 in_data = hdus[0].data
 n_x, n_y = in_data.shape[-1], in_data.shape[-2]
-assert n_x == beam.shape[-3] and n_y == beam.shape[-4], "beam and image xy dimensions do not match"
+assert n_x == beam.shape[-3] and n_y == beam.shape[-4], "beam and image xy dimensions do not match %s %s %s" % (str(beam.shape), n_x, n_y)
 if opts.reverse:
     out_data = in_data/np.average(1/beam, weights=beam**2, axis=0)**-1
 else:
     out_data = in_data*np.average(1/beam, weights=beam**2, axis=0)**-1
-hdus[0].data = out_data.reshape((1, 1, data_y, data_x)))
+hdus[0].data = out_data.reshape((1, 1, data_y, data_x))
 hdu.writeto(fits_out)
