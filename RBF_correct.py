@@ -47,6 +47,8 @@ in_table = parse(args[1]).get_first_table()
 if opts.cat_out is None:
     in_path = os.path.splitext(args[1])
     opts.cat_out = in_path[0]+"_corr"+in_path[1]
+if os.path.exists(opts.cat_out):
+    os.remove(opts.cat_out)
 
 #select those sources with simple morphology which is detected in both lo and hi
 if opts.bad in map_table.array.dtype.names:
@@ -59,7 +61,7 @@ ion_map = map_table.array[~map_table.array.mask[opts.ra_cat] & simple]
 p = np.stack((Longitude(ion_map[opts.ra_cat]*u.deg, wrap_angle=180*u.deg),
               ion_map[opts.dec_cat]), axis=-1)
 q = np.stack((Longitude(ion_map[opts.ra_raw]*u.deg, wrap_angle=180*u.deg),
-              ion_map[opts.ra_raw]), axis=-1)
+              ion_map[opts.dec_raw]), axis=-1)
 
 pc = np.stack((Longitude(in_table.array[opts.ra_in], wrap_angle=180*u.deg, unit=u.deg),
               in_table.array[opts.dec_in]), axis=-1)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import numpy as np
 from astropy.table import Table
 from astropy.time import Time
@@ -28,6 +29,8 @@ opts, args = parser.parse_args()
 # variability
 # gpstime
 
+if os.path.exists(args[2]):
+    os.remove(args[2])
 imstack = ImageStack(args[0], freq='121-132')
 t = Table.read(args[1])
 
