@@ -17,6 +17,7 @@ add various columns and delete unneeded ones.
 
 opts, args = parser.parse_args()
 parser.add_option("-v", "--variability", dest="var", action="store_true", help="Calculate variability image parameters (dS etc)")
+parser.add_option("-o", "--obsid", dest="obsid", default=None, help="time in gps format")
 #FIXME add options for 
 # freq
 # ra column name
@@ -29,8 +30,9 @@ parser.add_option("-v", "--variability", dest="var", action="store_true", help="
 imstack = ImageStack(args[0], freq='121-132')
 
 # elongation
-obsid = float(args[0][:10])
-time = Time(obsid, format='gps')
+if not opts.obsid:
+    opts.obsid = args[0][:10]
+time = Time(float(obsid), format='gps')
 sun = get_sun(time.utc)
 t['elongation'] = sun.separation(SkyCoord(t['ra', 'dec']*deg))
 
