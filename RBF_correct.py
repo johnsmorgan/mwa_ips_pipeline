@@ -73,4 +73,5 @@ for i in range(len(pc)):
 in_table = in_table.to_table()
 in_table[opts.ra_out] = Longitude(dvc[:, 0]*u.deg, wrap_angle=360*u.deg)
 in_table[opts.dec_out] = dvc[:, 1]*u.deg
+in_table.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'dec_corr', 'ra_corr', 'dec_corr', 'background', 'local_rms', 'peak_flux', 'err_peak_flux', 'a', 'b', 'pa', 'uuid'])
 in_table.write(opts.cat_out, format=opts.cat_fmt)
