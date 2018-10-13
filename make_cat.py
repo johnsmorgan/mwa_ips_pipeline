@@ -47,8 +47,8 @@ if opts.var:
     t['dS'] = np.sqrt((t['peak_flux']+t['background'])**2 - t['background']**2)
     t['err_dS'] = np.sqrt((t['peak_flux']+t['background']+t['local_rms'])**2 - t['background']**2) - t['dS']
     t['noise'] = np.sqrt((t['peak_flux']+t['background'])**2 - t['peak_flux']**2)
-    t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'a', 'b', 'pa', 'elongation', 'pbcor', 'uuid', 'dS', 'err_dS', 'local_rms', 'noise'])
+    t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'a', 'b', 'pa', 'elongation', 'pbcor', 'uuid', 'dS', 'err_dS', 'local_rms', 'noise', 'snr'])
 else:
-    t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'peak_flux', 'background', 'local_rms', 'a', 'b', 'pa', 'elongation', 'pbcor', 'uuid'])
+    t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'peak_flux', 'background', 'local_rms', 'a', 'b', 'pa', 'elongation', 'pbcor', 'uuid', 'snr'])
 
 t.write(args[2], format='votable')
