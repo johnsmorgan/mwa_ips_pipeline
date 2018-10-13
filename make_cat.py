@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from astropy.table import Table
 from astropy.time import Time
 from astropy.units import deg
