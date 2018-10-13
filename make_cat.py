@@ -37,6 +37,7 @@ if not opts.obsid:
 time = Time(float(opts.obsid), format='gps')
 sun = get_sun(time.utc)
 t['elongation'] = sun.separation(SkyCoord(t['ra', 'dec']*deg))
+t['snr'] = t['peak_flux'] / t['local_rms']
 
 t["pbcor"] = ones(len(t))
 for s in range(len(t)):
@@ -46,7 +47,7 @@ if opts.var:
     t['dS'] = np.sqrt((t['peak_flux']+t['background'])**2 - t['background']**2)
     t['err_dS'] = np.sqrt((t['peak_flux']+t['background']+t['local_rms'])**2 - t['background']**2) - t['dS']
     t['noise'] = np.sqrt((t['peak_flux']+t['background'])**2 - t['peak_flux']**2)
-    t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'a', 'b', 'pa', 'elongation', 'pbcor', 'uuid', 'dS', 'err_dS', 'noise'])
+    t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'a', 'b', 'pa', 'elongation', 'pbcor', 'uuid', 'dS', 'err_dS', 'local_rms', 'noise'])
 else:
     t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'peak_flux', 'background', 'local_rms', 'a', 'b', 'pa', 'elongation', 'pbcor', 'uuid'])
 
