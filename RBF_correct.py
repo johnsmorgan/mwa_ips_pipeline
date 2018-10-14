@@ -12,8 +12,9 @@ def transform_rbf(p, q, v, alpha=1, reverse=False):
     n = len(p)
     distance = la.norm(p - v, axis=1)
     if np.any(distance == 0.):
-        return q[np.where(distance==0.)[0]]
-    w = distance ** (-2 * alpha) # figure out the weights for the different sources
+        w = np.where(distance == 0., 1., 0.)
+    else:
+        w = distance ** (-2 * alpha) # figure out the weights for the different sources
     d = q-p
     if reverse:
         sign = -1.
@@ -29,11 +30,11 @@ parser.add_option("--ra_raw", default="ra", dest="ra_raw", help="name of uncorre
 parser.add_option("--de_raw", default="dec", dest="dec_raw", help="name of uncorrected Decl. column in model file")
 parser.add_option("--ra_cat", default="ra_cat", dest="ra_cat", help="name of correct RA column in model file")
 parser.add_option("--de_cat", default="dec_cat", dest="dec_cat", help="name of correct decl. column in model file")
-parser.add_option("--bad", default="bad", dest="bad", help="name of complex flag column in model file")
 parser.add_option("--ra_in", default="ra", dest="ra_in", help="name of RA column in input file")
 parser.add_option("--de_in", default="dec", dest="dec_in", help="name of Decl. column in input file")
 parser.add_option("--ra_out", default="ra_corr", dest="ra_out", help="name of RA column in output file")
 parser.add_option("--de_out", default="dec_corr", dest="dec_out", help="name of Decl. column in output file")
+parser.add_option("--bad", default="bad", dest="bad", help="name of complex flag column in model file")
 parser.add_option("--cat_out_fmt", default='votable', dest="cat_fmt", help="format of output catalog")
 parser.add_option("--alpha", default=2.0, dest="alpha", type="float", help="RBF alpha (default=%default)")
 parser.add_option("--reverse", dest="reverse", action="store_true", help="Reverse correction (e.g. make astrometrically catalogue match distorted image)")
@@ -43,9 +44,6 @@ opts, args = parser.parse_args()
 map_table = parse(args[0]).get_first_table()
 
 in_table = parse(args[1]).get_first_table()
-if opts.cat_out is None:
-    in_path = os.path.splitext(args[1])
-    opts.cat_out = in_path[0]+"_corr"+in_path[1]
 
 if os.path.exists(args[2]):
     os.remove(args[2])
@@ -70,7 +68,15 @@ pc = np.stack((Longitude(in_table.array[opts.ra_in], wrap_angle=180*u.deg, unit=
 dvc = np.zeros(pc.shape)
 for i in range(len(pc)):
     v = pc[i]
-    dvc[i] = transform_rbf(q, p, v, opts.alpha, opts.reverse)
+    try:
+        dvc[i] = transform_rbf(q, p, v, opts.alpha, opts.reverse)
+    except:
+        print i
+        print pc
+        print pc[i-1]
+        print transform_rbf(q, p, v, opts.alpha, opts.reverse)
+        print transform_rbf(q, p, pc[i-1], opts.alpha, opts.reverse)
+        raise
 
 in_table = in_table.to_table()
 in_table[opts.ra_out] = Longitude(dvc[:, 0]*u.deg, wrap_angle=360*u.deg)

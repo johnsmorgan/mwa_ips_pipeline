@@ -2,19 +2,19 @@
 stilts tmatch2 \
         in1=$1 \
         in2=$2 \
-	icmd1="delcols 'elongation pbcor'"
+	icmd1="delcols 'elongation pbcor'" \
         matcher=skyEllipse \
         values1="ra dec a b pa" \
         values2="ra dec a b pa" \
         suffix1="_cont" suffix2="_scint" \
 	find="best2" \
         params=60 \
-	fixcols='all' \
         ocmd='select snr_cont>5||snr_scint>5' \
-	ocmd="colmeta -name elongation elongation_scint'"
-	ocmd="colmeta -name pbcor pbcor_scint'"
-	ocmd="addcol index dS/peak_flux_cont"
-	ocmd="colmeta -desc 'Scintillation Index' index"
+	ocmd="colmeta -name background_cont background" \
+	ocmd="colmeta -name peak_flux_cont peak_flux" \
+	ocmd="addcol index dS/peak_flux_cont" \
+	ocmd="colmeta -desc 'Scintillation Index' index" \
+	ocmd="addcol index_err index*hypot(err_dS/dS,local_rms_cont/peak_flux_cont)" \
         out=$3
 
 stilts tmatch2 \
@@ -26,4 +26,4 @@ stilts tmatch2 \
 	find="best2" \
         params=60 \
 	join=2not1 \
-        out=$4 \
+        out=$4
