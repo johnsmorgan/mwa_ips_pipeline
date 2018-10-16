@@ -14,6 +14,7 @@ stilts tmatch2 \
 	suffix1="" \
 	suffix2="_gleam" \
 	find=best1 \
+	join=all1 \
 	ocmd="colmeta -name Separation_gleam Separation" \
 	ocmd="addcol SepArcM_gleam 60*skyDistanceDegrees(RAJ2000,DEJ2000,ra_corr,dec_corr)" \
         out=$2
