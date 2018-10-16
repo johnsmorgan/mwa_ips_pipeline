@@ -17,8 +17,8 @@ FLOODCLIP=4
 #############################
 # xmatch variability with continuum 
 ############################
-$(OBSID)_$(FREQ)_$(VARIABILITY)_double.vot : $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss_gleam.vot $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot
-	$(SH) $(PIPELINE)/double_detections.sh $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss_gleam.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_double.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_no_continuum.vot
+$(OBSID)_$(FREQ)_double.vot : $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss_gleam.vot $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot
+	$(SH) $(PIPELINE)/double_detections.sh $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss_gleam.vot $(OBSID)_$(FREQ)_double.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_no_continuum.vot
 
 #############################
 # xmatch with GLEAM
@@ -52,14 +52,15 @@ $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot : $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $
 $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot : $(OBSID)_$(FREQ)_$(CONTINUUM).vot
 	$(SH) $(PIPELINE)/match_calibration.sh $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(CAT_PATH) $(FREQ)
 
+
 ################################
 # Tidy up catalogs 
 ################################
 $(OBSID)_$(FREQ)_$(VARIABILITY).vot : $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot
-	$(SH) $(PIPELINE)/make_cat.py $(OBSID).hdf5 $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot -o $(OBSID) -v
+	$(PYTHON) $(PIPELINE)/make_cat.py $(OBSID).hdf5 $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot -o $(OBSID) -v
 
 $(OBSID)_$(FREQ)_$(CONTINUUM).vot : $(OBSID)_$(FREQ)_$(CONTINUUM)_comp.vot
-	$(SH) $(PIPELINE)/make_cat.py $(OBSID).hdf5 $(OBSID)_$(FREQ)_$(CONTINUUM)_comp.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot -o $(OBSID)
+	$(PYTHON) $(PIPELINE)/make_cat.py $(OBSID).hdf5 $(OBSID)_$(FREQ)_$(CONTINUUM)_comp.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot -o $(OBSID)
 
 ################################
 # Aegean
