@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 master=$2/TGSSADR1_7sigma_catalog.fits
-badsep=$3
 
 stilts tmatch2 \
         in1=$1 \
