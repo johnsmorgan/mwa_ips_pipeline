@@ -43,8 +43,11 @@ sun = get_sun(time.utc)
 t['elongation'] = sun.separation(SkyCoord(t['ra'], t['dec'], unit = "deg"))
 t['snr'] = t['peak_flux'] / t['local_rms']
 
-t["pbcor"] = ones(len(t))
-for s in range(len(t)):
+t["pbcor"] = np.nan*ones(len(t))
+# loop over all unmasked values
+for s in np.argwhere(~t['ra'].mask)[:, 0]:
+    print s,
+    print imstack.world2pix(t['ra'][s], t['dec'][s])
     t["pbcor"][s] = imstack.world2beam(t['ra'][s], t['dec'][s])
 
 if opts.var:
