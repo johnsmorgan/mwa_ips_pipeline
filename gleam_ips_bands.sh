@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
 # NB this script is not included in the makefile and must be run separately!
 
 # take standard GLEAM catalogue and produce peak fluxes for IPS bands

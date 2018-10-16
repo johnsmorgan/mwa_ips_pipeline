@@ -1,4 +1,5 @@
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 master=$2/TGSSADR1_7sigma_catalog.fits
 
 stilts tmatch2 \

@@ -1,4 +1,5 @@
-#/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 stilts tmatch2 \
         in1=$1 \
         in2=$2 \

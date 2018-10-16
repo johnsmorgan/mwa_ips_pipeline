@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
 # match against position and flux density calibration catalogue
 case $3 in
 	057-068)centroid=080;;

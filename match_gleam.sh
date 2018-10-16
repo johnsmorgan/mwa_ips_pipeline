@@ -1,4 +1,5 @@
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 master=$3/gleam_ips_bands.fits
 stilts tmatch2 \
         in1=$1 \
