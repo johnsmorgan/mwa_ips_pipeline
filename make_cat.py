@@ -39,7 +39,8 @@ if not opts.obsid:
     opts.obsid = args[0][:10]
 time = Time(float(opts.obsid), format='gps')
 sun = get_sun(time.utc)
-t['elongation'] = sun.separation(SkyCoord(t['ra', 'dec']*deg))
+#t['elongation'] = sun.separation(SkyCoord(t['ra', 'dec']*deg))
+t['elongation'] = sun.separation(SkyCoord(t['ra'], t['dec'], unit = "deg"))
 t['snr'] = t['peak_flux'] / t['local_rms']
 
 t["pbcor"] = ones(len(t))
