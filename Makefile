@@ -67,7 +67,7 @@ $(OBSID)_$(FREQ)_$(CONTINUUM).vot : $(OBSID)_$(FREQ)_$(CONTINUUM)_comp.vot
 ################################
 
 $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot : $(OBSID)_$(FREQ)_$(VARIABILITY).fits
-	$(AEGEAN) --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(CONTINUUM).fits
+	$(AEGEAN) --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)_$(VARIABILITY).vot $(OBSID)_$(FREQ)_$(VARIABILITY).fits
 
 $(OBSID)_$(FREQ)_$(CONTINUUM)_comp.vot : $(OBSID)_$(FREQ)_$(CONTINUUM).fits
 	$(AEGEAN) --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(CONTINUUM).fits
