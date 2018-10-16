@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 master=$2/TGSSADR1_7sigma_catalog.fits
+badsep=$3
 
 stilts tmatch2 \
         in1=$1 \
@@ -59,10 +60,3 @@ stilts tmatch2 \
 	find=best1 \
 	join=all1 \
 	ocmd="delcols uuid_1" \
-	ocmd="addcol bad SepArcM_tgss>1.15||NULL_RA_tgss" \
-	out=${1%.vot}_allips.vot
-
-stilts tpipe \
-	in=${1%.vot}_allips.vot \
-	cmd="select !bad" \
-	out=${1%.vot}_good.vot
