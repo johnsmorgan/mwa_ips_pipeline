@@ -37,10 +37,10 @@ $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss.vot : $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.
 # add ionospheric corrections
 #############################
 $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot : $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot
-	$(PYTHON) $(PIPELINE)/RBF_correct.py $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(FREQ) $(OBSID)_$(FREQ)_$(VARIABILITY).vot $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot
+	$(PYTHON) $(PIPELINE)/RBF_correct.py $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot
 
 $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot : $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot
-	$(PYTHON) $(PIPELINE)/RBF_correct.py $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(FREQ) $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot
+	$(PYTHON) $(PIPELINE)/RBF_correct.py $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot
 
 # ionospheric plots
 #$(OBSID)_$(FREQ)_$(CONTINUUM)_cal_map.png : $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(OBSID)_$(FREQ)_$(CONTINUUM).fits
@@ -71,3 +71,9 @@ $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot : $(OBSID)_$(FREQ)_$(VARIABILITY).fits
 
 $(OBSID)_$(FREQ)_$(CONTINUUM)_comp.vot : $(OBSID)_$(FREQ)_$(CONTINUUM).fits
 	$(AEGEAN) --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(CONTINUUM).fits
+
+################################
+# Browse metadata
+################################
+browsemeta:
+	xdg-open http://mwa-metadata01.pawsey.org.au/observation/obs/?obsid=$(OBSID)
