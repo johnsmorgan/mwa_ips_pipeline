@@ -2,18 +2,18 @@
 Pipeline for automatic reduction of MWA IPS Data
 
 ## Pre-requisites
-bash
-python
+- bash
+- python
 - numpy
 - astropy
-stilts
+- stilts
 
 ## Catalogues needed
-GLEAM
-TGSS ADR 1
-Callingham
-MRC
-VLSS
+- GLEAM
+- TGSS ADR 1
+- Callingham
+- MRC
+- VLSS
 
 ## Run before first use of pipeline
 
