@@ -2,6 +2,9 @@
 set -euo pipefail
 master=$2/TGSSADR1_7sigma_catalog.fits
 
+# All contains all matches for all ips sources.
+# Any individual ips source may have zero or many matches.
+# ips sources without a match will not appear in this file
 stilts tmatch2 \
         in1=$1 \
         in2=$master \
@@ -24,6 +27,8 @@ stilts tmatch2 \
 	ocmd="colmeta -name Separation_tgss Separation" \
 	out=${1%.vot}_all.vot
 
+# A single entry for the closest match for each ips source
+# Sources without a TGSS match still appear in this file
 stilts tmatch2 \
 	in1=$1 \
 	in2=$master \
@@ -47,6 +52,8 @@ stilts tmatch2 \
 	ocmd="colmeta -name Separation_tgss Separation" \
 	out=${1%.vot}_allips.vot \
 
+# Deal with problem where a TGSS source matches with multiple IPS sources
+# and note those sources with no TGSS match or only a bad match
 stilts tmatch2 \
 	in1=${1%.vot}_allips.vot \
 	in2=${1%.vot}_all.vot \
@@ -59,3 +66,17 @@ stilts tmatch2 \
 	find=best1 \
 	join=all1 \
 	ocmd="delcols uuid_1" \
+	ocmd="addcol bad SepArcM_tgss>1.15||NULL_RA_tgss" \
+	out=${1%.vot}_allips.vot
+
+stilts tpipe \
+	in=${1%.vot}_allips.vot \
+	cmd="select !bad" \
+	cmd="delcols bad" \
+	out=${1%.vot}_good.vot
+
+stilts tpipe \
+	in=${1%.vot}_allips.vot \
+	cmd="select bad" \
+	cmd="delcols bad" \
+	out=${1%.vot}_bad.vot
