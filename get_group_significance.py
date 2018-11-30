@@ -5,11 +5,13 @@ from scipy.stats import norm
 
 from optparse import OptionParser
 
-parser = OptionParser(usage = "usage: %prog input1.vot input2.vot" +
+parser = OptionParser(usage = "usage: %prog input1.vot input2.vot output.vot" +
 """
-Using the Add RA_corr and DE_corr
+Add three further columns to input 2 with name of best match, name of first alternative match, and probabilities of each.
+prints out lots of useful information.
 """)
 
+# FIXME lots of hard-coded stuff here that should be user-settable.
 opts, args = parser.parse_args()
 
 if os.path.exists(args[2]):
@@ -24,6 +26,7 @@ MATCH_THRESH = 2.0*OFFSET
 t = Table.read(args[0])
 t['p'] = where(t['sigma_ips_%s' % CAT] > SNR_THRESH, ones(len(t)), zeros(len(t)))
 t2 = Table.read(args[1])
+# add new columns to t2
 t2["p_match1"] = ones(len(t2))
 t2["name_match2"] = Table.MaskedColumn([""]*len(t2), mask=[True]*len(t2), dtype='S24')
 t2["p_match2"] = zeros(len(t2))
