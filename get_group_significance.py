@@ -8,7 +8,11 @@ from optparse import OptionParser
 parser = OptionParser(usage = "usage: %prog input1.vot input2.vot output.vot" +
 """
 Add three further columns to input 2 with name of best match, name of first alternative match, and probabilities of each.
-prints out lots of useful information.
+
+input2 should contain one row per source
+input1 should contain multipe rows per source, one for each potential match, with these linked with the 'GroupID' column.
+
+Prints out lots of useful information.
 """)
 
 # FIXME lots of hard-coded stuff here that should be user-settable.
