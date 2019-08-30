@@ -1,6 +1,8 @@
 import os
 import numpy as np
 from astropy.table import Table
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from optparse import OptionParser
 
