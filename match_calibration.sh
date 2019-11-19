@@ -50,13 +50,17 @@ stilts tmatch2 \
 	join=all1 \
 	ocmd="addcol complex !NULL_GroupID_1||!NULL_GroupID_1" \
 	ocmd='delcols "uuid_1 GroupID GroupSize GroupID_1 GroupSize_1"' \
-        out=${1%.vot}_cal.vot
-rm ${1%.vot}_cal_all.vot
+        out=${1%.vot}_cal.vot || stilts tpipe \
+        in=${1%.vot}_cal.vot \
+	cmd="addcol complex false" \
+	cmd="addcol GroupID NULL" \
+	cmd="addcol GroupSize NULL" \
+	out=${1%.vot}_cal.vot
 
 stilts tpipe \
         in=${1%.vot}_cal.vot \
 	cmd="select '!complex'" \
-	cmd="addcol flux_ratio Fp${centroid}/peak_flux" \
+	cmd="addcol flux_ratio Fp${centroid}*pbcor/peak_flux" \
 	cmd="keepcols 'flux_ratio'" \
 	cmd='rowrange 1 +50' \
 	cmd="stats Quartile2" \
