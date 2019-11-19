@@ -7,6 +7,7 @@ import os, sys
 import numpy as np
 
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 from numpy.linalg import norm
@@ -19,7 +20,6 @@ from astropy import units as u
 from scipy.interpolate import LSQBivariateSpline, SmoothBivariateSpline
 
 LIM={'121-132': (-3.5, 3.5), '057-068': (-7.0, 7.0)}
-
  
 votable = parse(sys.argv[1])
 root=os.path.splitext(sys.argv[1])[0]
@@ -46,9 +46,9 @@ else:
 
 ion_map = table.array[~table.array.mask['ra_cat'] & simple]
 
-p = np.stack((Longitude(ion_map['ra_cat']*u.deg, wrap_angle=180*u.deg),
+p = np.stack((Longitude(ion_map['ra_cat']*u.deg, wrap_angle=180*u.deg).deg,
               ion_map['dec_cat']), axis=-1)
-q = np.stack((Longitude(ion_map['ra']*u.deg, wrap_angle=180*u.deg),
+q = np.stack((Longitude(ion_map['ra']*u.deg, wrap_angle=180*u.deg).deg,
               ion_map['dec']), axis=-1)
 
 vlss_complex = table.array[~table.array.mask['ra_cat'] & ~simple]
