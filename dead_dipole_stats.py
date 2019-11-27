@@ -51,23 +51,16 @@ else:
     out_line = ""
     out_line += "%d,%s,%d,%d,%d," % (obsid, timestring, np.sum(tile_flags)/N_POL, np.sum(dipole_tile_flags)/N_POL, np.sum(all_tile_flags)/N_POL)
 
-#fig = plt.figure()
-#gs = fig.add_gridspec(1, 2)
-#ax1 = fig.add_subplot(gs[0, 0])
-#ax2 = fig.add_subplot(gs[0, 1])
-
-#print dipole_flags.shape
-#print dipole_flags[(~all_tile_flags) & (pol == 'X')].shape
 x_filter = (~all_tile_flags) & (pol == 'X')
 y_filter = (~all_tile_flags) & (pol == 'Y')
-#print x_filter.shape
-#print dipole_flags[np.where(x_filter)].shape
-#print dipole_flags[np.where(y_filter)].shape
+
+# number of dead dipoles by dipole
 x_sum = np.sum(dipole_flags[np.where(x_filter)], axis=0)
 y_sum = np.sum(dipole_flags[np.where(y_filter)], axis=0)
 
-x_sum1 = np.sum(dipole_flags[np.where(x_filter)], axis=1) # by tile breakdown
-y_sum1 = np.sum(dipole_flags[np.where(y_filter)], axis=1) # by tile breakdown
+# number of dead dipoles tile
+x_sum1 = np.sum(dipole_flags[np.where(x_filter)], axis=1)
+y_sum1 = np.sum(dipole_flags[np.where(y_filter)], axis=1)
 
 if not opts.csv:
     print "sum dipole flags by dipole x: %s" % (x_sum)
