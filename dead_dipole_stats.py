@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from collections import Counter
 import os, sys
-from optparse import OptionParser #NB zeus does not have argparse!
+from optparse import OptionParser
 import numpy as np
 from astropy.io import fits
 from astropy.time import Time
@@ -9,14 +9,11 @@ import matplotlib.pyplot as plt
 
 N_POL = 2
 
-parser = OptionParser(usage="usage: %prog metafits_path" + 
-                     """
-                      first 10 characters of metafits file is taken to be obsid
-                     """)
-parser.add_option("--out_suffix", dest="suffix", default="_plot.png",  help="output suffix, can include any supported matplotlib format (default %default")
-parser.add_option("--no_plot", action='store_true', dest="no_plot",  help="no plot")
-parser.add_option("--csv", action='store_true', dest="csv",  help="write out csv line")
-parser.add_option("--csv_header", action='store_true', dest="csv_header",  help="write out csv head line and quit")
+parser = OptionParser(usage="usage: %prog metafits_path\nFirst 10 characters of metafits file is taken to be obsid")
+parser.add_option("--out_suffix", dest="suffix", default="_plot.png", help="output suffix, can include any supported matplotlib format (default %default")
+parser.add_option("--no_plot", action='store_true', dest="no_plot", help="no plot")
+parser.add_option("--csv", action='store_true', dest="csv", help="write out csv line")
+parser.add_option("--csv_header", action='store_true', dest="csv_header", help="write out csv head line and quit")
 
 opts, args = parser.parse_args()
 if opts.csv_header:
@@ -31,15 +28,15 @@ timestring = Time(obsid, format='gps').utc.isot
 hdus = fits.open(args[0])
 n_tile = len(hdus[1].data)/float(N_POL)
 pol = hdus[1].data['Pol']
-tile_flags =  hdus[1].data['Flag']
-dipole_flags = hdus[1].data['Delays']==32
+tile_flags = hdus[1].data['Flag']
+dipole_flags = hdus[1].data['Delays'] == 32
 
 # identify tiles that will (by default) be flagged by cotter
 # due to dipole flags
 dipole_tile_flags = np.zeros(tile_flags.shape, dtype=np.bool)
 
 for a in sorted(set(hdus[1].data['Antenna'])):
-    ant_idx = hdus[1].data['Antenna']==a
+    ant_idx = hdus[1].data['Antenna'] == a
     if np.max(np.sum(dipole_flags[ant_idx], axis=1)) > 1:
         dipole_tile_flags[ant_idx] = True
 
@@ -51,7 +48,7 @@ if not opts.csv:
     print "%d/%d tiles flagged due to bad dipoles according to cotter default criteria" % (np.sum(dipole_tile_flags)/N_POL, n_tile)
     print "%d/%d tiles flagged in total" % (np.sum(all_tile_flags)/N_POL, n_tile)
 else:
-    out_line=""
+    out_line = ""
     out_line += "%d,%s,%d,%d,%d," % (obsid, timestring, np.sum(tile_flags)/N_POL, np.sum(dipole_tile_flags)/N_POL, np.sum(all_tile_flags)/N_POL)
 
 #fig = plt.figure()
@@ -60,17 +57,17 @@ else:
 #ax2 = fig.add_subplot(gs[0, 1])
 
 #print dipole_flags.shape
-#print dipole_flags[(~all_tile_flags) & (pol=='X')].shape
-x_filter = (~all_tile_flags) & (pol=='X')
-y_filter = (~all_tile_flags) & (pol=='Y')
+#print dipole_flags[(~all_tile_flags) & (pol == 'X')].shape
+x_filter = (~all_tile_flags) & (pol == 'X')
+y_filter = (~all_tile_flags) & (pol == 'Y')
 #print x_filter.shape
 #print dipole_flags[np.where(x_filter)].shape
 #print dipole_flags[np.where(y_filter)].shape
-x_sum =  np.sum(dipole_flags[np.where(x_filter)], axis=0)
-y_sum =  np.sum(dipole_flags[np.where(y_filter)], axis=0)
+x_sum = np.sum(dipole_flags[np.where(x_filter)], axis=0)
+y_sum = np.sum(dipole_flags[np.where(y_filter)], axis=0)
 
-x_sum1 =  np.sum(dipole_flags[np.where(x_filter)], axis=1) # by tile breakdown
-y_sum1 =  np.sum(dipole_flags[np.where(y_filter)], axis=1) # by tile breakdown
+x_sum1 = np.sum(dipole_flags[np.where(x_filter)], axis=1) # by tile breakdown
+y_sum1 = np.sum(dipole_flags[np.where(y_filter)], axis=1) # by tile breakdown
 
 if not opts.csv:
     print "sum dipole flags by dipole x: %s" % (x_sum)
@@ -84,7 +81,10 @@ else:
 if not opts.no_plot:
     max_ = np.max(np.stack((x_sum, y_sum)))
     fig = plt.figure()
-    fig.suptitle("%d %s\n%d tiles, %d flagged tiles , %d dipole flagged tiles, %d total flagged tiles\n colour scale max=%d\nX: %s Y:%s X|Y:%s" % (obsid, timestring, n_tile,np.sum(tile_flags)/N_POL,np.sum(dipole_tile_flags)/N_POL,np.sum(all_tile_flags)/N_POL, max_, str(Counter(x_sum1))[8:-1], str(Counter(y_sum1))[8:-1], str(Counter(y_sum1+x_sum1))[8:-1]))
+    fig.suptitle("%d %s\n%d tiles, %d flagged tiles , %d dipole flagged tiles, %d total flagged tiles\n colour scale max=%d\nX: %s Y:%s X|Y:%s" % (obsid, timestring,
+                                                                                                                                                   n_tile, np.sum(tile_flags)/N_POL, np.sum(dipole_tile_flags)/N_POL, np.sum(all_tile_flags)/N_POL,
+                                                                                                                                                   max_,
+                                                                                                                                                   str(Counter(x_sum1))[8:-1], str(Counter(y_sum1))[8:-1], str(Counter(y_sum1+x_sum1))[8:-1]))
 
 
     plt.subplot(1, 2, 1)
