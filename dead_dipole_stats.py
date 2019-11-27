@@ -5,6 +5,9 @@ from optparse import OptionParser
 import numpy as np
 from astropy.io import fits
 from astropy.time import Time
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 N_POL = 2
