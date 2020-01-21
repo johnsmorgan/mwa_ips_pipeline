@@ -1,7 +1,6 @@
 """
-write out sun coordinates for a given obsid to a single-line .csv file
+Write out sun coordinates for a given obsid to a single-line .csv file
 """
-import sys
 from astropy.time import Time
 from astropy.coordinates import get_sun, SkyCoord
 from optparse import OptionParser
