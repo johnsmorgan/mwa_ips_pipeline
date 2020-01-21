@@ -8,10 +8,12 @@ from optparse import OptionParser
 
 parser = OptionParser(usage = "usage: %prog obsid" +
 """
-Produces a .csv file containing the coordinates
+Produces a .csv file containing the coordinates of the Sun at the given GPS time
 """)
 parser.add_option("--ecliptic", dest="ecliptic", action="store_true", help="Give Sun coordinates in ecliptic rather than the default J2000 equatorial")
 opts, args = parser.parse_args()
+if not len(args) is 1:
+    parser.error("wrong number of arguments")
 
 obsid = args[0]
 time = Time(float(obsid), format='gps')
