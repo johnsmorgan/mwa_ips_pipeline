@@ -25,4 +25,3 @@ with open("%s_sun.csv" % obsid, 'w') as f:
         sun2 = SkyCoord(sun.ra, sun.dec).geocentrictrueecliptic
         print >> f, "LON,LAT"
         print >> f, "%f,%f" % (sun2.lon.deg, sun2.lat.deg)
-
