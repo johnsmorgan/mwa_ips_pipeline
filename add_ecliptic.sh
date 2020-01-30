@@ -21,8 +21,8 @@ lat_col=${7:-lat}
 sun_lon_col=${8:-sun_lon}
 
 stilts tpipe \
-	in=${1} \
+	in="${infile}" \
 	cmd="addskycoords fk5 ecliptic $ra_col $dec_col $lon_col $lat_col" \
-	cmd="addcol $sun_lon_col (($lon_col-$2)%360)" \
+	cmd="addcol $sun_lon_col (($lon_col-$sun_lon)%360)" \
 	cmd="replacecol $sun_lon_col $sun_lon_col<0?$sun_lon_col+360:$sun_lon_col" \
-	out=$outfile
+	out="$outfile"
