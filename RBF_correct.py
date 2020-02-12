@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import matplotlib
 import numpy as np
 from numpy import linalg as la
 from astropy.io.votable import parse

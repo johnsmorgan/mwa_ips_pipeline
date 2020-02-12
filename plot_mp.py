@@ -1,6 +1,8 @@
 import os
 import numpy as np
 from astropy.table import Table
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from optparse import OptionParser
 
@@ -36,12 +38,12 @@ if os.path.exists(args[1]):
 
 t = Table.read(args[0])
 
-fig = plt.figure(figsize=(8, 6))
+fig = plt.figure(figsize=(16, 12))
 normal = ~(t['peaked'] | t['flat'])
 flat = (t['flat'] & ~(t['peaked'] | t['gps'] | t['peak_below_72mhz'] | t['convex']))
 plt.errorbar(np.sin(np.radians(t['elongation'])), t['scint_index'], t['index_err'], fmt=',', capsize=0, color=COLORS[0], label='_nolegend_')
 plt.plot(np.sin(np.radians(t['elongation'][normal])), t['scint_index'][normal], '+', markersize=8, color='black', label='_nolegend_')
-plt.plot(np.sin(np.radians(t['elongation'][flat])), t['scint_index'][flat], 'o', markersize=8, alpha=0.75, markerfacecolor='none', label='flat')
+plt.plot(np.sin(np.radians(t['elongation'][flat])), t['scint_index'][flat], 'o', markersize=8, alpha=0.75, color='black', markerfacecolor='none', label='flat')
 plt.plot(np.sin(np.radians(t['elongation'][t['gps']])), t['scint_index'][t['gps']], 'o', markersize=8, alpha=0.75, color=COLORS[2], label='gps')
 plt.plot(np.sin(np.radians(t['elongation'][t['peaked']])), t['scint_index'][t['peaked']], 'o', markersize=10, alpha=0.75, color=COLORS[3], label='gleam pk')
 plt.plot(np.sin(np.radians(t['elongation'][t['peak_below_72mhz']])), t['scint_index'][t['peak_below_72mhz']], 'o', markersize=8, alpha=0.75, color=COLORS[4], label='pk<72')

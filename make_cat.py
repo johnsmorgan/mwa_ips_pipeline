@@ -51,7 +51,7 @@ t['elongation'] = sun.separation(SkyCoord(t['ra'], t['dec'], unit = "deg"))
 t['snr'] = t['peak_flux'] / t['local_rms']
 
 print "calculating primary beam"
-t["pbcor"] = np.nan*ones(len(t))
+t["pbcor"] = np.nan*np.ones(len(t))
 # loop over all unmasked values
 for s in np.argwhere(~t['ra'].mask)[:, 0]:
     print s,
