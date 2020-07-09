@@ -37,7 +37,7 @@ table = votable.get_first_table()
 header=fits.open(fitsfile)[0].header
 bmaj, bmin, bpa = 60*header['BMAJ'], 60*header['BMIN'], header['BPA']
 
-#select those sources with simple morphology which is detected in both lo and hi
+# select those sources with simple morphology
 
 if 'complex' in table.array.dtype.names:
     simple = ~table.array['complex']
@@ -46,16 +46,21 @@ else:
 
 ion_map = table.array[~table.array.mask['ra_cat'] & simple]
 
-p = np.stack((Longitude(ion_map['ra_cat']*u.deg, wrap_angle=180*u.deg).deg,
+if np.mean(np.cos(Longitude(ion_map['ra_cat']*u.deg))) > 0:
+    wrap_angle=180.*u.deg
+else:
+    wrap_angle=360.*u.deg
+
+p = np.stack((Longitude(ion_map['ra_cat']*u.deg, wrap_angle=wrap_angle).deg,
               ion_map['dec_cat']), axis=-1)
-q = np.stack((Longitude(ion_map['ra']*u.deg, wrap_angle=180*u.deg).deg,
+q = np.stack((Longitude(ion_map['ra']*u.deg, wrap_angle=wrap_angle).deg,
               ion_map['dec']), axis=-1)
 
 vlss_complex = table.array[~table.array.mask['ra_cat'] & ~simple]
 
-pc = np.stack((np.where(vlss_complex['ra_cat'] > 180, vlss_complex['ra_cat']-360, vlss_complex['ra_cat']),
+pc = np.stack((Longitude(vlss_complex['ra_cat']*u.deg, wrap_angle=wrap_angle).deg,
               vlss_complex['dec_cat']), axis=-1)
-qc = np.stack((np.where(vlss_complex['ra'] > 180, vlss_complex['ra']-360, vlss_complex['ra']),
+qc = np.stack((Longitude(vlss_complex['ra']*u.deg, wrap_angle=wrap_angle).deg,
               vlss_complex['dec']), axis=-1)
 
 def transform_rbf(p, q, v, alpha=1):
@@ -123,7 +128,7 @@ ell.set_color('black')
 ell.set_facecolor('none')
 ell.set_linewidth(1)
 ax.add_artist(ell)
-print "Ellipse parameters: x=%g, y=%g, semi_a=%g, semi_b=%g" % (x, y, a, b)
+print("Ellipse parameters: x=%g, y=%g, semi_a=%g, semi_b=%g" % (x, y, a, b))
 
 ell1 = Ellipse(xy=[0, 0], width=bmaj, height=bmin, angle=bpa, zorder=30)
 ell1.set_color('black')
@@ -170,7 +175,7 @@ ell.set_color('black')
 ell.set_facecolor('none')
 ell.set_linewidth(1)
 ax.add_artist(ell)
-print "Ellipse parameters: x=%g, y=%g, semi_a=%g, semi_b=%g" % (x, y, a, b)
+print("Ellipse parameters: x=%g, y=%g, semi_a=%g, semi_b=%g" % (x, y, a, b))
 
 ell1 = Ellipse(xy=[0, 0], width=bmaj, height=bmin, angle=bpa, zorder=31)
 ell1.set_color('black')
