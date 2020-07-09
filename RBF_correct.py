@@ -55,13 +55,13 @@ else:
 
 ion_map = map_table.array[~map_table.array.mask[opts.ra_cat] & simple]
 
-p = np.stack((Longitude(ion_map[opts.ra_cat]*u.deg, wrap_angle=180*u.deg),
-              ion_map[opts.dec_cat]*u.deg), axis=-1)
-q = np.stack((Longitude(ion_map[opts.ra_raw]*u.deg, wrap_angle=180*u.deg),
-              ion_map[opts.dec_raw]*u.deg), axis=-1)
+p = np.stack((Longitude(ion_map[opts.ra_cat]*u.deg, wrap_angle=180*u.deg).deg,
+              ion_map[opts.dec_cat]), axis=-1)
+q = np.stack((Longitude(ion_map[opts.ra_raw]*u.deg, wrap_angle=180*u.deg).deg,
+              ion_map[opts.dec_raw]), axis=-1)
 
-pc = np.stack((Longitude(in_table.array[opts.ra_in], wrap_angle=180*u.deg, unit=u.deg),
-              in_table.array[opts.dec_in]*u.deg), axis=-1)
+pc = np.stack((Longitude(in_table.array[opts.ra_in], wrap_angle=180*u.deg, unit=u.deg).deg,
+              in_table.array[opts.dec_in]), axis=-1)
 
 # transform points
 dvc = np.zeros(pc.shape)
