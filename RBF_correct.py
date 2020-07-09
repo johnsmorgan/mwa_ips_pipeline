@@ -56,12 +56,12 @@ else:
 ion_map = map_table.array[~map_table.array.mask[opts.ra_cat] & simple]
 
 p = np.stack((Longitude(ion_map[opts.ra_cat]*u.deg, wrap_angle=180*u.deg),
-              ion_map[opts.dec_cat]), axis=-1)
+              ion_map[opts.dec_cat]*u.deg), axis=-1)
 q = np.stack((Longitude(ion_map[opts.ra_raw]*u.deg, wrap_angle=180*u.deg),
-              ion_map[opts.dec_raw]), axis=-1)
+              ion_map[opts.dec_raw]*u.deg), axis=-1)
 
 pc = np.stack((Longitude(in_table.array[opts.ra_in], wrap_angle=180*u.deg, unit=u.deg),
-              in_table.array[opts.dec_in]), axis=-1)
+              in_table.array[opts.dec_in]*u.deg), axis=-1)
 
 # transform points
 dvc = np.zeros(pc.shape)
@@ -70,11 +70,11 @@ for i in range(len(pc)):
     try:
         dvc[i] = transform_rbf(q, p, v, opts.alpha, opts.reverse)
     except:
-        print i
-        print pc
-        print pc[i-1]
-        print transform_rbf(q, p, v, opts.alpha, opts.reverse)
-        print transform_rbf(q, p, pc[i-1], opts.alpha, opts.reverse)
+        print(i)
+        print(pc)
+        print(pc[i-1])
+        print(transform_rbf(q, p, v, opts.alpha, opts.reverse))
+        print(transform_rbf(q, p, pc[i-1], opts.alpha, opts.reverse))
         raise
 
 in_table = in_table.to_table()
