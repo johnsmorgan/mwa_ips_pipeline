@@ -11,12 +11,13 @@ stilts tmatch2 \
 	find="best2" \
         params=60 \
         ocmd='select snr_cont>5||snr_scint>5' \
-	ocmd="colmeta -name background_cont background" \
 	ocmd="colmeta -name peak_flux_cont peak_flux" \
 	ocmd="addcol scint_index dS/peak_flux_cont" \
 	ocmd="colmeta -desc 'Scintillation Index' scint_index" \
 	ocmd="addcol index_err scint_index*hypot(err_dS/dS,local_rms_cont/peak_flux_cont)" \
         out=$3
+
+	#ocmd="colmeta -name background_cont background" \
 
 stilts tmatch2 \
         in1=$1 \

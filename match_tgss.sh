@@ -22,7 +22,7 @@ stilts tmatch2 \
 	find=all \
 	fixcols='all' \
 	ocmd="addcol SepArcM_tgss 60*skyDistanceDegrees(RA_tgss,DEC_tgss,ra_corr,dec_corr)" \
-	ocmd="addcol sigma_ips_tgss (hypot(Peak_flux_tgss,noise/pbcor)-noise/pbcor)/(local_rms/pbcor)" \
+	ocmd="addcol sigma_ips_tgss (hypot(Peak_flux_tgss,background/pbcor)-background/pbcor)/(local_rms/pbcor)" \
 	ocmd="colmeta -desc 'S/N tgss would have scintillating at 100% in variability image' sigma_ips_tgss" \
 	ocmd="colmeta -name Separation_tgss Separation" \
 	out=${1%.vot}_all.vot
@@ -47,7 +47,7 @@ stilts tmatch2 \
 	join=all1 \
 	fixcols='all' \
 	ocmd="addcol SepArcM_tgss 60*skyDistanceDegrees(RA_tgss,DEC_tgss,ra_corr,dec_corr)" \
-	ocmd="addcol sigma_ips_tgss (hypot(Peak_flux_tgss,noise/pbcor)-noise/pbcor)/(local_rms/pbcor)" \
+	ocmd="addcol sigma_ips_tgss (hypot(Peak_flux_tgss,background/pbcor)-background/pbcor)/(local_rms/pbcor)" \
 	ocmd="colmeta -desc 'S/N tgss would have scintillating at 100% in variability image' sigma_ips_tgss" \
 	ocmd="colmeta -name Separation_tgss Separation" \
 	out=${1%.vot}_allips.vot \
