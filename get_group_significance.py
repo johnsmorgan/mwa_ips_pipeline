@@ -50,7 +50,7 @@ for g in range(t['GroupID'].min(), t['GroupID'].max()):
     if len(seps) < 2:
         if len(seps) == 0:
             n_nomatch += 1
-        print t2[t2['GroupID'] == g]['GroupID']
+        print(t2[t2['GroupID'] == g]['GroupID'])
         t2['GroupID'][t2['GroupID'] == g] = -g
         continue
     n_100 += 1
@@ -61,15 +61,15 @@ for g in range(t['GroupID'].min(), t['GroupID'].max()):
     t2['p_match1'][t2['GroupID'] == g] = likelihoods[idx][0]
     if likelihoods[idx][0] < 0.99:
         n_99 += 1
-        print '*',
+        print('*', sep='')
     if likelihoods[idx][0] < 0.95:
         n_95 += 1
-        print '*',
+        print('*', sep='')
         t2['name_match2'][t2['GroupID'] == g] = source_names[idx][1]
         t2['p_match2'][t2['GroupID'] == g] = likelihoods[idx][1]
     else:
         t2['GroupID'][t2['GroupID'] == g] = -g
-    print
+    print()
     
     mini_table = t[group_gt_thresh]['sigma_ips_%s' % CAT, 'SepArcM_%s' % CAT, 'p']
     mini_table['p'].format = '%1.3g'
@@ -77,12 +77,12 @@ for g in range(t['GroupID'].min(), t['GroupID'].max()):
     mini_table['sigma_ips_%s' % CAT].format = '%4.1f'
 
     idx_tab = argsort(mini_table['SepArcM_%s' % CAT])
-    print "group %d" % g
-    print mini_table[idx_tab]
-    print 
-print "ngroups = %d" % g
-print "nnomatch = %d" % n_nomatch
-print "n100 = %d" % n_100
-print "n99 = %d" % n_99
-print "n95 = %d" % n_95
+    print("group %d" % g)
+    print(mini_table[idx_tab])
+    print()
+print("ngroups = %d" % g)
+print("nnomatch = %d" % n_nomatch)
+print("n100 = %d" % n_100)
+print("n99 = %d" % n_99)
+print("n95 = %d" % n_95)
 t2.write(args[2], format='votable')
