@@ -13,7 +13,7 @@ set -euo pipefail
 table1=/data/catalogs/vlss_vizier.fits
 table2=/data/catalogs/mrc.b64
 table3=gleam_ips_bands.fits
-table_out=ips_continuum_cal
+table_out=ips_continuum_cal.fits
 stilts tcatn \
 	nin=2 \
 	in1=$table1 in2=$table2 \
