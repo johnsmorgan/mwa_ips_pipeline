@@ -76,6 +76,8 @@ t['limb'] = limb
 t['sun_lat'] = np.degrees(sun_lat)
 m1 = get_scint_index2(t['p'], np.radians(t['sun_lat']), WAVELENGTH, cutoff1=1.0, cutoff2=1.0, rho=1.0, b=1.6)
 m2 = get_scint_index2(t['p'], np.radians(t['sun_lat']), WAVELENGTH, cutoff1=1.0, cutoff2=1.0, rho=1.5, b=1.6)
+t['mpt1'] = m1
+t['mpt2'] = m2
 t['nsi1'] = t['scint_index']/m1
 t['nsi2'] = t['scint_index']/m2
 t['e_nsi1'] = t['index_err']/m1
