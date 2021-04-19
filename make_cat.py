@@ -82,7 +82,7 @@ if opts.var:
     t['dS'] = np.sqrt((t['peak_flux']+t['background'])**2 - t['background']**2)
     t['err_dS'] = np.sqrt((t['peak_flux']+t['background']+t['local_rms'])**2 - t['background']**2) - t['dS']
     t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'a', 'b', 'pa', 'elongation', 'pbcor', 'pbcor_norm', 'uuid', 'dS', 'err_dS', 'background', 'local_rms', 'snr'])
-elif opts.interp
+elif opts.interp:
     t['dS'] = np.sqrt((t['peak_flux2']+t['background2'])**2 - t['background2']**2)
     t['err_dS'] = np.sqrt((t['peak_flux2']+t['background2']+t['local_rms2'])**2 - t['background2']**2) - t['dS']
     t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'a', 'b', 'pa', 'elongation', 'pbcor', 'pbcor_norm', 'uuid', 'dS', 'err_dS', 'background', 'local_rms', 'snr'])
