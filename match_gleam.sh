@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 master=$3/gleam_ips_bands.fits
-stilts tmatch2 \
+topcat -stilts tmatch2 \
         in1=$1 \
         in2=$master \
 	icmd2="addcol flat NULL_alpha?Fp162>(Fp080*sqrt(2)):alpha>-0.5" \
 	icmd2="addcol peaked !NULL_nu_p" \
-	icmd2="keepcols 'GLEAM RAJ2000 DEJ2000 awide bwide pawide Fp162 alpha e_alpha peaked gps peak_below_72mhz convex flat'" \
+	icmd2='keepcols "GLEAM RAJ2000 DEJ2000 awide bwide pawide Fp162 alpha e_alpha peaked gps peak_below_72mhz convex flat"' \
         matcher=SkyEllipse \
 	params=60 \
         values1='ra_corr dec_corr a b pa' \

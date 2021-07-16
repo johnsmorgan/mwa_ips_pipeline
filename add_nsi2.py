@@ -5,7 +5,6 @@ from astropy.table import Table
 from astropy.time import Time
 from astropy.units import deg
 from astropy.coordinates import SkyCoord, get_sun
-from sun_calc import time_to_sun_cartesian
 from scint_parameters import get_solar_params
 from imstack import ImageStack
 
@@ -13,6 +12,13 @@ from optparse import OptionParser, OptionValueError
 
 POL_OPTIONS=("XX", "YY", "I")
 WAVELENGTH=1.862
+
+def time_to_sun_cartesian(t):
+    """
+    return sun ra, dec in radians
+    """
+    sun = get_sun(t)
+    return sun.cartesian.xyz
 
 def get_scint_index2(p, phi, wavelength, cutoff1=0.8, cutoff2=2.0, rho=1.0, b=1.6):
     """
@@ -32,9 +38,7 @@ parser = OptionParser(usage = "usage: %prog input.vot output.vot" +
 
 add various columns and delete unneeded ones.
 """)
-parser.add_option("-v", "--variability", dest="var", action="store_true", help="Calculate variability image parameters (dS etc)")
 parser.add_option("-o", "--obsid", dest="obsid", default=None, help="time in gps format used for calculation of Sun location (default: first 10 letters of input.hdf5)")
-parser.add_option("--pol", dest="pol", default="I", help="primary beam polarisation to use: {} (default=%default)".format((", ".join(POL_OPTIONS))))
 
 opts, args = parser.parse_args()
 #FIXME add options for 
@@ -46,9 +50,6 @@ opts, args = parser.parse_args()
 # variability
 # gpstime
 # set verbosity
-
-if not opts.pol in POL_OPTIONS:
-    raise OptionValueError("polarisation must be one of %s" % (", ".join(POL_OPTIONS)))
 
 if os.path.exists(args[1]):
     os.remove(args[1])
@@ -80,8 +81,8 @@ t['mpt1'] = m1
 t['mpt2'] = m2
 t['nsi1'] = t['scint_index']/m1
 t['nsi2'] = t['scint_index']/m2
-t['e_nsi1'] = t['index_err']/m1
-t['e_nsi2'] = t['index_err']/m2
+t['e_nsi1'] = t['err_scint_index']/m1
+t['e_nsi2'] = t['err_scint_index']/m2
 
 print("writing votable")
 t.write(args[1], format='votable')

@@ -6,7 +6,7 @@ case $3 in
 	121-132)centroid=162;;
 esac
 
-stilts tmatch2 \
+topcat -stilts tmatch2 \
         in1=$1 \
         in2=$2/ips_continuum_cal.fits \
 	icmd2='colmeta -name ra $1' \
@@ -21,7 +21,7 @@ stilts tmatch2 \
         params=60 \
         out=${1%.vot}_cal_all.vot
 
-stilts tmatch2 \
+topcat -stilts tmatch2 \
         in1=$1 \
         in2=$2/ips_continuum_cal.fits \
 	icmd2='colmeta -name ra $1' \
@@ -36,13 +36,13 @@ stilts tmatch2 \
         params=60 \
         out=${1%.vot}_cal.vot
 
-stilts tmatch2 \
-        in1=${1%.vot}_cal.vot \
-        in2=${1%.vot}_cal_all.vot \
+topcat -stilts tmatch2 \
+	in1=${1%.vot}_cal.vot \
+	in2=${1%.vot}_cal_all.vot \
 	icmd2='keepcols "uuid GroupID GroupSize"' \
-        matcher=Exact\
-        values1='uuid' \
-        values2='uuid' \
+	matcher=Exact\
+	values1='uuid' \
+	values2='uuid' \
 	suffix1="" \
 	suffix2="_1" \
 	fixcols=all \
@@ -50,19 +50,19 @@ stilts tmatch2 \
 	join=all1 \
 	ocmd="addcol complex !NULL_GroupID_1||!NULL_GroupID_1" \
 	ocmd='delcols "uuid_1 GroupID GroupSize GroupID_1 GroupSize_1"' \
-        out=${1%.vot}_cal.vot || stilts tpipe \
+	out=${4} || topcat -stilts tpipe \
         in=${1%.vot}_cal.vot \
 	cmd="addcol complex false" \
 	cmd="addcol GroupID NULL" \
 	cmd="addcol GroupSize NULL" \
-	out=${1%.vot}_cal.vot
+	out=$4
 
-stilts tpipe \
-        in=${1%.vot}_cal.vot \
+topcat -stilts tpipe \
+        in=$4 \
 	cmd="select '!complex'" \
 	cmd="addcol flux_ratio Fp${centroid}*pbcor/peak_flux" \
 	cmd="keepcols 'flux_ratio'" \
 	cmd='rowrange 1 +50' \
 	cmd="stats Quartile2" \
-        out=${1%.vot}_flux_ratio.csv
+        out=${1%.vot}_flux_ratio.csv \
 	ofmt=csv
