@@ -3,7 +3,8 @@ Plot RBF solution given matched file
 FIXME Write ellipse parameters out to same (or separate) file.
 FIXME combine into a single plot file?
 """
-import os, sys
+import os
+import argparse
 import numpy as np
 
 import matplotlib
@@ -15,53 +16,57 @@ from astropy.io.votable import parse
 from astropy.io import fits
 from astropy.coordinates import Longitude
 from astropy import units as u
-#from scipy.stats import norm
 
 from scipy.interpolate import LSQBivariateSpline, SmoothBivariateSpline
 
-LIM={'121-132': (-3.5, 3.5), '057-068': (-7.0, 7.0)}
+EXTENT=3.5
  
-votable = parse(sys.argv[1])
-root=os.path.splitext(sys.argv[1])[0]
-freq=sys.argv[2]
-fitsfile=sys.argv[3]
-format=sys.argv[4]
-# 1147313992_121-132_selfcal-I_cal.vot 121-132 1147313992_121-132_selfcal-I.fits .png
-#votable = parse('1147313992_121-132_selfcal-I_cal.vot')
-#root=os.path.splitext('1147307144_121-132_selfcal-I_cal.vot')[0]
-#freq='121-132'
-#fitsfile='1147313992_121-132_selfcal-I.fits'
-#format='.png'
+parser = argparse.ArgumentParser()
+parser.add_argument('intable', help='Input table')
+parser.add_argument('infits', help='Input FITS image (for WCS)')
+parser.add_argument('--outformat', default="png", help="image format ")
+parser.add_argument('--extent', default=EXTENT, help="plot size in arcminutes")
+parser.add_argument('--ra', default='ra', help="Apparant RA column")
+parser.add_argument('--dec', default='dec', help="Apparant Dec column")
+parser.add_argument('--ra_cat', default='ra_cat', help="Catalogued RA column")
+parser.add_argument('--dec_cat', default='dec_cat', help="Catalogued Dec column")
+parser.add_argument('--complex', default='complex', help="Boolean column denoting 'complex' sources")
+
+args = parser.parse_args()
+
+votable = parse(args.intable)
 table = votable.get_first_table()
 
-header=fits.open(fitsfile)[0].header
+root = os.path.splitext(args.intable)[0]
+
+header = fits.open(args.infits)[0].header
 bmaj, bmin, bpa = 60*header['BMAJ'], 60*header['BMIN'], header['BPA']
 
 # select those sources with simple morphology
 
 if 'complex' in table.array.dtype.names:
-    simple = ~table.array['complex']
+    simple = ~table.array[args.complex]
 else:
     simple = np.ones(len(table.array), dtype=np.bool)
 
-ion_map = table.array[~table.array.mask['ra_cat'] & simple]
+ion_map = table.array[~table.array.mask[args.ra_cat] & simple]
 
-if np.mean(np.cos(Longitude(ion_map['ra_cat']*u.deg))) > 0:
+if np.mean(np.cos(Longitude(ion_map[args.ra_cat]*u.deg))) > 0:
     wrap_angle=180.*u.deg
 else:
     wrap_angle=360.*u.deg
 
-p = np.stack((Longitude(ion_map['ra_cat']*u.deg, wrap_angle=wrap_angle).deg,
-              ion_map['dec_cat']), axis=-1)
-q = np.stack((Longitude(ion_map['ra']*u.deg, wrap_angle=wrap_angle).deg,
-              ion_map['dec']), axis=-1)
+p = np.stack((Longitude(ion_map[args.ra_cat]*u.deg, wrap_angle=wrap_angle).deg,
+              ion_map[args.dec_cat]), axis=-1)
+q = np.stack((Longitude(ion_map[args.ra]*u.deg, wrap_angle=wrap_angle).deg,
+              ion_map[args.dec]), axis=-1)
 
-vlss_complex = table.array[~table.array.mask['ra_cat'] & ~simple]
+vlss_complex = table.array[~table.array.mask[args.ra_cat] & ~simple]
 
-pc = np.stack((Longitude(vlss_complex['ra_cat']*u.deg, wrap_angle=wrap_angle).deg,
-              vlss_complex['dec_cat']), axis=-1)
-qc = np.stack((Longitude(vlss_complex['ra']*u.deg, wrap_angle=wrap_angle).deg,
-              vlss_complex['dec']), axis=-1)
+pc = np.stack((Longitude(vlss_complex[args.ra_cat]*u.deg, wrap_angle=wrap_angle).deg,
+              vlss_complex[args.dec_cat]), axis=-1)
+qc = np.stack((Longitude(vlss_complex[args.ra]*u.deg, wrap_angle=wrap_angle).deg,
+              vlss_complex[args.dec]), axis=-1)
 
 def transform_rbf(p, q, v, alpha=1):
     n = len(p)
@@ -96,20 +101,17 @@ plt.figure(figsize=(6, 6))
 ax = plt.gca()
 d = q-p
 dc = qc-pc
-#ax.quiver(pc[:, 0], pc[:, 1], dc[:, 0], dc[:, 1], angles='xy',scale_units='xy',scale=1/60., color='gray')
 ax.quiver(p[:, 0], p[:, 1], d[:, 0], d[:, 1], angles='xy',scale_units='xy',scale=1/60.)
 ax.quiver(p[:, 0], p[:, 1], dvp[:, 0], dvp[:, 1], angles='xy',scale_units='xy',scale=1/60., color='blue', alpha=0.5)
 ax.invert_xaxis()
 labels = ax.get_xticks().tolist()
-#labels = [l if float(l) >= 0 else str(float(l)+360)  for l in labels)]
 labels = ["" if i%2==1 else l if float(l) >= 0 else str(float(l)+360)  for i, l in enumerate(labels)]
 ax.set_xticklabels(labels)
 
 plt.axes().set_aspect('equal')
 ax.set_xlabel("RA (degrees)")
 ax.set_ylabel("Decl. (degrees)")
-plt.savefig("%s_map%s" % (root, format))
-#plt.show()
+plt.savefig("%s_map.%s" % (root, args.outformat))
 
 #FIXME cut off a certain distance from the centre of the image?
 #can we get the primary beam correction factor for each source and filter on that???
@@ -138,31 +140,17 @@ ell1.set_linewidth(1)
 ax.add_artist(ell1)
 
 ax.plot(d2[:, 0], d2[:, 1], '+', color='grey', zorder=10)
-ax.set_xlim(LIM[freq])
-ax.set_ylim(LIM[freq])
+ax.set_xlim([-args.extent, args.extent])
+ax.set_ylim([-args.extent, args.extent])
 plt.xlabel('RA offset/arcmin')
 plt.ylabel('Dec offset/arcmin')
 plt.tight_layout()
-plt.savefig("%s_xy_raw%s" % (root, format))
-
-#for i, label in enumerate(['x', 'y']):
-#    var = d2[:, i]
-#    plt.figure(figsize=(4, 4))
-#    _, x, _ = plt.hist(var, bins=20, normed=True)
-#    mu = np.mean(var)
-#    sigma = np.std(var)
-#    sh = semihex(var)
-#    plt.plot(x, norm.pdf(x, mu, sigma))
-#    plt.plot(x, norm.pdf(x, mu, sigma))
-#    print "mean=%f, std=%f, semihex=%g" % (mu, sigma, sh)
-
+plt.savefig("%s_xy_raw.%s" % (root, args.outformat))
 
 d2 = 60*(d-dvp)
 
 fig = plt.figure(figsize=(3, 3))
 ax = fig.add_subplot(111, aspect='equal')
-#d_sd_x = semihex(d2[:, 0])
-#d_sd_y = semihex(d2[:, 1])
 
 x = np.mean(d2[:, 0])
 y = np.mean(d2[:, 1])
@@ -170,7 +158,6 @@ a = semihex(d2[:, 0])
 b = semihex(d2[:, 1])
 
 ell = Ellipse(xy=[x, y], width=2*a, height=2*b, angle=0., zorder=20)
-#ell.set_alpha(0)
 ell.set_color('black')
 ell.set_facecolor('none')
 ell.set_linewidth(1)
@@ -181,13 +168,12 @@ ell1 = Ellipse(xy=[0, 0], width=bmaj, height=bmin, angle=bpa, zorder=31)
 ell1.set_color('black')
 ell1.set_facecolor('none')
 ell1.set_linewidth(1)
-#ell1.set_linestyle(':')
 ax.add_artist(ell1)
 
 ax.plot(d2[:, 0], d2[:, 1], '+', color='grey', zorder=10)
-ax.set_xlim(LIM[freq])
-ax.set_ylim(LIM[freq])
+ax.set_xlim([-args.extent, args.extent])
+ax.set_ylim([-args.extent, args.extent])
 plt.xlabel('RA offset/arcmin')
 plt.ylabel('Dec offset/arcmin')
 plt.tight_layout()
-plt.savefig("%s_xy_corr%s" % (root, format))
+plt.savefig("%s_xy_corr.%s" % (root, args.outformat))
