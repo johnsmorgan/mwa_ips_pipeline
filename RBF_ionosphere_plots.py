@@ -18,6 +18,15 @@ from astropy.coordinates import Longitude, SkyCoord
 from astropy import units as u
 
 EXTENT=3.5
+C = (
+    '#000000',
+    '#0072b2',
+    '#56b4e9',
+    '#009e73',
+    '#cc79a7',
+    '#d55e00',
+    '#e69f00',
+    '#f0e442')
  
 parser = argparse.ArgumentParser()
 parser.add_argument('intable', help='Input table')
@@ -28,6 +37,7 @@ parser.add_argument('--ra', default='ra', help="Apparant RA column")
 parser.add_argument('--dec', default='dec', help="Apparant Dec column")
 parser.add_argument('--ra_cat', default='ra_cat', help="Catalogued RA column")
 parser.add_argument('--dec_cat', default='dec_cat', help="Catalogued Dec column")
+parser.add_argument('--beam', default='pbcor_norm', help="beam column")
 parser.add_argument('--complex', default='complex', help="Boolean column denoting 'complex' sources")
 
 args = parser.parse_args()
@@ -96,6 +106,10 @@ for i in range(len(pc)):
     dvc[i] = transform_rbf(p, q, v, 2)
     dvc[i] -= v
 
+# classify by beam
+h1 = ion_map[args.beam] > 0.5
+h2 = ion_map[args.beam] > 0.25
+h3 = ion_map[args.beam] > 0.1
 fig = plt.figure(figsize=(6, 6), dpi=160)
 #ax = plt.gca()
 wcs = WCS(header).celestial
@@ -104,16 +118,24 @@ pp = np.array(wcs.world_to_pixel(SkyCoord(p[:, 0]*u.deg, p[:, 1]*u.deg)))
 qp = np.array(wcs.world_to_pixel(SkyCoord(q[:, 0]*u.deg, q[:, 1]*u.deg)))
 dp = qp-pp
 #dc = qc-pc
-ax.quiver(pp[0], pp[1], 60*dp[0], 60*dp[1])
+#ax.quiver(pp[0], pp[1], 60*dp[0], 60*dp[1], color='black')
+
+ax.quiver(pp[0, h1], pp[1, h1], dp[0, h1], dp[1, h1], color=C[0], angles='xy',scale_units='xy', scale=1/60.)
+ax.quiver(pp[0, h2&~h1], pp[1, h2&~h1], dp[0, h2&~h1], dp[1, h2&~h1], color=C[1], angles='xy', scale_units='xy', scale=1/60.)
+ax.quiver(pp[0, h3&~h2], pp[1, h3&~h2], dp[0, h3&~h2], dp[1, h3&~h2], color=C[4], angles='xy',scale_units='xy', scale=1/60.)
+ax.quiver(pp[0, ~h3], pp[1, ~h3], dp[0, ~h3], dp[1, ~h3], color=C[6], angles='xy',scale_units='xy', scale=1/60.)
 # figure out offset for dvp in pixel space
 qpv = np.array(wcs.world_to_pixel(SkyCoord((p[:, 0]+dvp[:, 0])*u.deg, (p[:, 1]+dvp[:, 1])*u.deg)))
 dpv = qpv - pp
-ax.quiver(pp[0], pp[1], 60*dpv[0], 60*dpv[1], color='blue', alpha=0.5)
+ax.quiver(pp[0], pp[1], 60*dpv[0], 60*dpv[1], color='grey', alpha=0.5)
 ax.grid()
+ax.set_xlim([0, header['NAXIS1']])
+ax.set_ylim([0, header['NAXIS2']])
 
 #plt.axes().set_aspect('equal')
-ax.set_xlabel("RA (degrees)")
-ax.set_ylabel("Decl. (degrees)")
+ax.set_xlabel("RA")
+ax.set_ylabel("Decl.")
+#plt.tight_layout()
 plt.savefig("%s_map.%s" % (root, args.outformat))
 
 #FIXME cut off a certain distance from the centre of the image?
@@ -128,7 +150,7 @@ y = np.mean(d2[:, 1])
 a = semihex(d2[:, 0])
 b = semihex(d2[:, 1])
 
-ell = Ellipse(xy=[x, y], width=2*a, height=2*b, angle=0., zorder=20)
+ell = Ellipse(xy=[x, y], width=2*a, height=2*b, angle=0., zorder=100)
 ell.set_color('black')
 ell.set_facecolor('none')
 ell.set_linewidth(1)
@@ -142,7 +164,10 @@ ell1.set_linewidth(1)
 #ell1.set_linestyle(':')
 ax.add_artist(ell1)
 
-ax.plot(d2[:, 0], d2[:, 1], '+', color='grey', zorder=10)
+ax.plot(d2[h1, 0], d2[h1, 1], '+', color=C[0], zorder=40)
+ax.plot(d2[h2&~h1, 0], d2[h2&~h1, 1], '+', color=C[1], zorder=30)
+ax.plot(d2[h3&~h2, 0], d2[h3&~h2, 1], '+', color=C[4], zorder=20)
+ax.plot(d2[~h3, 0], d2[~h3, 1], '+', color=C[6], zorder=10)
 ax.set_xlim([-args.extent, args.extent])
 ax.set_ylim([-args.extent, args.extent])
 plt.xlabel('RA offset/arcmin')
@@ -167,13 +192,16 @@ ell.set_linewidth(1)
 ax.add_artist(ell)
 print("Ellipse parameters: x=%g, y=%g, semi_a=%g, semi_b=%g" % (x, y, a, b))
 
-ell1 = Ellipse(xy=[0, 0], width=bmaj, height=bmin, angle=bpa, zorder=31)
+ell1 = Ellipse(xy=[0, 0], width=bmaj, height=bmin, angle=bpa, zorder=100)
 ell1.set_color('black')
 ell1.set_facecolor('none')
 ell1.set_linewidth(1)
 ax.add_artist(ell1)
 
-ax.plot(d2[:, 0], d2[:, 1], '+', color='grey', zorder=10)
+ax.plot(d2[h1, 0], d2[h1, 1], '+', color=C[0], zorder=40)
+ax.plot(d2[h2&~h1, 0], d2[h2&~h1, 1], '+', color=C[1], zorder=30)
+ax.plot(d2[h3&~h2, 0], d2[h3&~h2, 1], '+', color=C[4], zorder=20)
+ax.plot(d2[~h3, 0], d2[~h3, 1], '+', color=C[6], zorder=10)
 ax.set_xlim([-args.extent, args.extent])
 ax.set_ylim([-args.extent, args.extent])
 plt.xlabel('RA offset/arcmin')
