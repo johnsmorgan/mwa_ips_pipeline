@@ -96,7 +96,7 @@ for i in range(len(pc)):
     dvc[i] = transform_rbf(p, q, v, 2)
     dvc[i] -= v
 
-fig = plt.figure(figsize=(6, 6))
+fig = plt.figure(figsize=(6, 6), dpi=160)
 #ax = plt.gca()
 wcs = WCS(header).celestial
 ax = fig.add_subplot(111, projection=wcs)
@@ -120,7 +120,7 @@ plt.savefig("%s_map.%s" % (root, args.outformat))
 #can we get the primary beam correction factor for each source and filter on that???
 
 d2 = 60*d
-fig = plt.figure(figsize=(3, 3))
+fig = plt.figure(figsize=(3, 3), dpi=160)
 ax = fig.add_subplot(111, aspect='equal')
 
 x = np.mean(d2[:, 0])
@@ -152,7 +152,7 @@ plt.savefig("%s_xy_raw.%s" % (root, args.outformat))
 
 d2 = 60*(d-dvp)
 
-fig = plt.figure(figsize=(3, 3))
+fig = plt.figure(figsize=(3, 3), dpi=160)
 ax = fig.add_subplot(111, aspect='equal')
 
 x = np.mean(d2[:, 0])
