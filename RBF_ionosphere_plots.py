@@ -1,7 +1,6 @@
 """
 Plot RBF solution given matched file
 FIXME Write ellipse parameters out to same (or separate) file.
-FIXME combine into a single plot file?
 """
 import os
 import argparse
@@ -14,10 +13,9 @@ from matplotlib.patches import Ellipse
 from numpy.linalg import norm
 from astropy.io.votable import parse
 from astropy.io import fits
-from astropy.coordinates import Longitude
+from astropy.wcs import WCS
+from astropy.coordinates import Longitude, SkyCoord
 from astropy import units as u
-
-from scipy.interpolate import LSQBivariateSpline, SmoothBivariateSpline
 
 EXTENT=3.5
  
@@ -60,6 +58,7 @@ p = np.stack((Longitude(ion_map[args.ra_cat]*u.deg, wrap_angle=wrap_angle).deg,
               ion_map[args.dec_cat]), axis=-1)
 q = np.stack((Longitude(ion_map[args.ra]*u.deg, wrap_angle=wrap_angle).deg,
               ion_map[args.dec]), axis=-1)
+d = q-p
 
 vlss_complex = table.array[~table.array.mask[args.ra_cat] & ~simple]
 
@@ -97,18 +96,22 @@ for i in range(len(pc)):
     dvc[i] = transform_rbf(p, q, v, 2)
     dvc[i] -= v
 
-plt.figure(figsize=(6, 6))
-ax = plt.gca()
-d = q-p
-dc = qc-pc
-ax.quiver(p[:, 0], p[:, 1], d[:, 0], d[:, 1], angles='xy',scale_units='xy',scale=1/60.)
-ax.quiver(p[:, 0], p[:, 1], dvp[:, 0], dvp[:, 1], angles='xy',scale_units='xy',scale=1/60., color='blue', alpha=0.5)
-ax.invert_xaxis()
-labels = ax.get_xticks().tolist()
-labels = ["" if i%2==1 else l if float(l) >= 0 else str(float(l)+360)  for i, l in enumerate(labels)]
-ax.set_xticklabels(labels)
+fig = plt.figure(figsize=(6, 6))
+#ax = plt.gca()
+wcs = WCS(header).celestial
+ax = fig.add_subplot(111, projection=wcs)
+pp = np.array(wcs.world_to_pixel(SkyCoord(p[:, 0]*u.deg, p[:, 1]*u.deg)))
+qp = np.array(wcs.world_to_pixel(SkyCoord(q[:, 0]*u.deg, q[:, 1]*u.deg)))
+dp = qp-pp
+#dc = qc-pc
+ax.quiver(pp[0], pp[1], 60*dp[0], 60*dp[1])
+# figure out offset for dvp in pixel space
+qpv = np.array(wcs.world_to_pixel(SkyCoord((p[:, 0]+dvp[:, 0])*u.deg, (p[:, 1]+dvp[:, 1])*u.deg)))
+dpv = qpv - pp
+ax.quiver(pp[0], pp[1], 60*dpv[0], 60*dpv[1], color='blue', alpha=0.5)
+ax.grid()
 
-plt.axes().set_aspect('equal')
+#plt.axes().set_aspect('equal')
 ax.set_xlabel("RA (degrees)")
 ax.set_ylabel("Decl. (degrees)")
 plt.savefig("%s_map.%s" % (root, args.outformat))
