@@ -55,9 +55,14 @@ bmaj, bmin, bpa = 60*header['BMAJ'], 60*header['BMIN'], header['BPA']
 if 'complex' in table.array.dtype.names:
     simple = ~table.array[args.complex]
 else:
-    simple = np.ones(len(table.array), dtype=np.bool)
+    simple = np.ones(len(table.array), dtype=bool)
 
 ion_map = table.array[~table.array.mask[args.ra_cat] & simple]
+
+# classify by beam
+h1 = ion_map[args.beam] > 0.5
+h2 = ion_map[args.beam] > 0.25
+h3 = ion_map[args.beam] > 0.1
 
 if np.mean(np.cos(Longitude(ion_map[args.ra_cat]*u.deg))) > 0:
     wrap_angle=180.*u.deg
@@ -78,10 +83,21 @@ qc = np.stack((Longitude(vlss_complex[args.ra]*u.deg, wrap_angle=wrap_angle).deg
               vlss_complex[args.dec]), axis=-1)
 
 def transform_rbf(p, q, v, alpha=1):
-    n = len(p)
     w = norm((p - v), axis=1) ** (-2 * alpha) # figure out the weights for the different sources
     d = q-p
     return v + np.sum(d*w[:, None], axis=0)/sum(w)
+
+def get_outliers(p, d, n=3, outlier_offset=1.5/60.):
+    """
+    get list of indices in p which have minimum distance from v
+    """
+    outlier = np.zeros(len(p), dtype=bool)
+    for i in range(len(p)):
+	    dist = norm((p - p[i]), axis=1) # figure out the distances for sources
+	    nearby = np.argsort(dist)[1:n+1]
+	    if np.min(norm(d[i] - d[nearby])) > outlier_offset:
+		    outlier[i] = True
+    return outlier
 
 def semihex(data, axis=None):
     """
@@ -90,9 +106,12 @@ def semihex(data, axis=None):
     h1, h5 = np.percentile(data, (100/6., 500/6.), axis=axis)
     return (h5-h1)/2.
 
+# make a list of sources to exclude as outliers
+outlier = get_outliers(p, d)
+print(f"{np.sum(outlier)} outliers")
+#p_good = p[h3&~outlier]
 
 # Find the offset for each source with that source excluded from the fit as a diagnostic
-
 dvp = np.zeros(p.shape)
 for i in range(len(p)):
     v = p[i]
@@ -106,10 +125,6 @@ for i in range(len(pc)):
     dvc[i] = transform_rbf(p, q, v, 2)
     dvc[i] -= v
 
-# classify by beam
-h1 = ion_map[args.beam] > 0.5
-h2 = ion_map[args.beam] > 0.25
-h3 = ion_map[args.beam] > 0.1
 fig = plt.figure(figsize=(6, 6), dpi=160)
 #ax = plt.gca()
 wcs = WCS(header).celestial
@@ -119,11 +134,14 @@ qp = np.array(wcs.world_to_pixel(SkyCoord(q[:, 0]*u.deg, q[:, 1]*u.deg)))
 dp = qp-pp
 #dc = qc-pc
 #ax.quiver(pp[0], pp[1], 60*dp[0], 60*dp[1], color='black')
+print(pp.shape)
+print(outlier.shape)
 
 ax.quiver(pp[0, h1], pp[1, h1], dp[0, h1], dp[1, h1], color=C[0], angles='xy',scale_units='xy', scale=1/60.)
 ax.quiver(pp[0, h2&~h1], pp[1, h2&~h1], dp[0, h2&~h1], dp[1, h2&~h1], color=C[1], angles='xy', scale_units='xy', scale=1/60.)
 ax.quiver(pp[0, h3&~h2], pp[1, h3&~h2], dp[0, h3&~h2], dp[1, h3&~h2], color=C[4], angles='xy',scale_units='xy', scale=1/60.)
 ax.quiver(pp[0, ~h3], pp[1, ~h3], dp[0, ~h3], dp[1, ~h3], color=C[6], angles='xy',scale_units='xy', scale=1/60.)
+ax.scatter(pp[0, outlier], pp[1, outlier], marker='x', color='lime', alpha=1.0, zorder = -10)
 # figure out offset for dvp in pixel space
 qpv = np.array(wcs.world_to_pixel(SkyCoord((p[:, 0]+dvp[:, 0])*u.deg, (p[:, 1]+dvp[:, 1])*u.deg)))
 dpv = qpv - pp
@@ -157,19 +175,21 @@ ell.set_linewidth(1)
 ax.add_artist(ell)
 print("Ellipse parameters: x=%g, y=%g, semi_a=%g, semi_b=%g" % (x, y, a, b))
 
-ell1 = Ellipse(xy=[0, 0], width=bmaj, height=bmin, angle=bpa, zorder=30)
+ell1 = Ellipse(xy=[0, 0], width=bmaj, height=bmin, angle=bpa, zorder=100)
 ell1.set_color('black')
 ell1.set_facecolor('none')
 ell1.set_linewidth(1)
 #ell1.set_linestyle(':')
 ax.add_artist(ell1)
 
-ax.plot(d2[h1, 0], d2[h1, 1], '+', color=C[0], zorder=40)
+ax.plot(d2[h1, 0], d2[h1, 1], '+', color='grey', zorder=40)
 ax.plot(d2[h2&~h1, 0], d2[h2&~h1, 1], '+', color=C[1], zorder=30)
 ax.plot(d2[h3&~h2, 0], d2[h3&~h2, 1], '+', color=C[4], zorder=20)
 ax.plot(d2[~h3, 0], d2[~h3, 1], '+', color=C[6], zorder=10)
+ax.scatter(d2[outlier, 0], d2[outlier, 1], marker='x', color='lime', alpha=1.0, zorder = -10)
 ax.set_xlim([-args.extent, args.extent])
 ax.set_ylim([-args.extent, args.extent])
+ax.invert_xaxis()
 plt.xlabel('RA offset/arcmin')
 plt.ylabel('Dec offset/arcmin')
 plt.tight_layout()
@@ -185,7 +205,7 @@ y = np.mean(d2[:, 1])
 a = semihex(d2[:, 0])
 b = semihex(d2[:, 1])
 
-ell = Ellipse(xy=[x, y], width=2*a, height=2*b, angle=0., zorder=20)
+ell = Ellipse(xy=[x, y], width=2*a, height=2*b, angle=0., zorder=100)
 ell.set_color('black')
 ell.set_facecolor('none')
 ell.set_linewidth(1)
@@ -198,12 +218,14 @@ ell1.set_facecolor('none')
 ell1.set_linewidth(1)
 ax.add_artist(ell1)
 
-ax.plot(d2[h1, 0], d2[h1, 1], '+', color=C[0], zorder=40)
+ax.plot(d2[h1, 0], d2[h1, 1], '+', color='grey', zorder=40)
 ax.plot(d2[h2&~h1, 0], d2[h2&~h1, 1], '+', color=C[1], zorder=30)
 ax.plot(d2[h3&~h2, 0], d2[h3&~h2, 1], '+', color=C[4], zorder=20)
 ax.plot(d2[~h3, 0], d2[~h3, 1], '+', color=C[6], zorder=10)
+ax.scatter(d2[outlier, 0], d2[outlier, 1], marker='x', color='lime', alpha=1.0, zorder = -10)
 ax.set_xlim([-args.extent, args.extent])
 ax.set_ylim([-args.extent, args.extent])
+ax.invert_xaxis()
 plt.xlabel('RA offset/arcmin')
 plt.ylabel('Dec offset/arcmin')
 plt.tight_layout()
