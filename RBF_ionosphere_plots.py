@@ -17,7 +17,6 @@ from astropy.wcs import WCS
 from astropy.coordinates import Longitude, SkyCoord
 from astropy import units as u
 
-EXTENT=3.5
 C = (
     '#000000',
     '#0072b2',
@@ -31,14 +30,14 @@ C = (
 parser = argparse.ArgumentParser()
 parser.add_argument('intable', help='Input table')
 parser.add_argument('infits', help='Input FITS image (for WCS)')
-parser.add_argument('--outformat', default="png", help="image format ")
-parser.add_argument('--extent', default=EXTENT, help="plot size in arcminutes")
-parser.add_argument('--ra', default='ra', help="Apparant RA column")
-parser.add_argument('--dec', default='dec', help="Apparant Dec column")
-parser.add_argument('--ra_cat', default='ra_cat', help="Catalogued RA column")
-parser.add_argument('--dec_cat', default='dec_cat', help="Catalogued Dec column")
-parser.add_argument('--beam', default='pbcor_norm', help="beam column")
-parser.add_argument('--complex', default='complex', help="Boolean column denoting 'complex' sources")
+parser.add_argument('--outformat', default="png", help="image format (default: %(default)s)")
+parser.add_argument('--extent', default=3.5, help="plot size in arcminutes (default: %(default)s)")
+parser.add_argument('--ra', default='ra', help="Apparant RA column (default: %(default)s)")
+parser.add_argument('--dec', default='dec', help="Apparant Dec column (default: %(default)s)")
+parser.add_argument('--ra_cat', default='ra_cat', help="Catalogued RA column (default: %(default)s)")
+parser.add_argument('--dec_cat', default='dec_cat', help="Catalogued Dec column (default: %(default)s)")
+parser.add_argument('--beam', default='pbcor_norm', help="beam column (default: %(default)s)")
+parser.add_argument('--complex', default='complex', help="Boolean column denoting 'complex' sources (default: %(default)s)")
 
 args = parser.parse_args()
 
