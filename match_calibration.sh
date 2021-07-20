@@ -6,6 +6,7 @@ case $3 in
 	121-132)centroid=162;;
 esac
 
+# find all matches for input file and record all rows for input file
 topcat -stilts tmatch2 \
         in1=$1 \
         in2=$2/ips_continuum_cal.fits \
@@ -21,6 +22,7 @@ topcat -stilts tmatch2 \
         params=60 \
         out=${1%.vot}_cal_all.vot
 
+# find all matches for input file and record only rows with matches
 topcat -stilts tmatch2 \
         in1=$1 \
         in2=$2/ips_continuum_cal.fits \
@@ -32,10 +34,12 @@ topcat -stilts tmatch2 \
         suffix1="" \
         suffix2="_cat" \
 	find="best2" \
-	join="all1" \
+	join="1and2" \
         params=60 \
         out=${1%.vot}_cal.vot
 
+# mark all rows with more than one match as complex in final catalogue
+# or || just add empty columns
 topcat -stilts tmatch2 \
 	in1=${1%.vot}_cal.vot \
 	in2=${1%.vot}_cal_all.vot \
@@ -50,16 +54,28 @@ topcat -stilts tmatch2 \
 	join=all1 \
 	ocmd="addcol complex !NULL_GroupID_1||!NULL_GroupID_1" \
 	ocmd='delcols "uuid_1 GroupID GroupSize GroupID_1 GroupSize_1"' \
+	ocmd='keepcols "ra err_ra dec err_dec peak_flux local_rms snr pbcor_norm ra_cat dec_cat Fp080 Fp162 Separation_cat complex GroupID GroupSize uuid"' \
 	out=${4} || topcat -stilts tpipe \
         in=${1%.vot}_cal.vot \
 	cmd="addcol complex false" \
 	cmd="addcol GroupID NULL" \
 	cmd="addcol GroupSize NULL" \
+	cmd='keepcols "ra err_ra dec err_dec peak_flux local_rms snr pbcor pbcor_norm ra_cat dec_cat Fp080 Fp162 Separation_cat complex GroupID GroupSize uuid"' \
 	out=$4
+
+if [ ! $4 == ${1%.vot}_cal.vot ]; then
+	rm ${1%.vot}_cal.vot
+fi
+
+if [ ! $4 == ${1%.vot}_cal_all.vot ]; then
+	rm ${1%.vot}_cal_all.vot
+fi
 
 topcat -stilts tpipe \
         in=$4 \
 	cmd="select '!complex'" \
+	cmd='select "pbcor_norm>0.5"' \
+	cmd="sorthead -down 50 peak_flux/local_rms" \
 	cmd="addcol flux_ratio Fp${centroid}*pbcor/peak_flux" \
 	cmd="keepcols 'flux_ratio'" \
 	cmd='rowrange 1 +50' \
