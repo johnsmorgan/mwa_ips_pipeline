@@ -35,6 +35,7 @@ parser.add_argument('--ra_cat', default='ra_cat', help="Catalogued RA column (de
 parser.add_argument('--dec_cat', default='dec_cat', help="Catalogued Dec column (default: %(default)s)")
 parser.add_argument('--out_format', default='votable', help="output format (default: %(default)s)")
 parser.add_argument("--no_overwrite", dest='overwrite', action="store_false", help="don't overwrite an existing beam (overwrites by default)")
+parser.add_argument('--fit_col', default='err_ra', help="Column that is -1 if aegean didn't fully fit (default: %(default)s)")
 
 args = parser.parse_args()
 
@@ -45,11 +46,18 @@ header = fits.open(args.infits)[0].header
 
 table = Table.read(args.intable)
 tabarray = table.as_array()
+
+# remove sources that are not fit (pixel resolution accuracy only)
+no_fit = tabarray[args.fit_col] == -1.0
+print(f"{np.sum(no_fit)} / {len(tabarray)} with no aegean fit)")
+tabarray = tabarray[~no_fit]
+table = table[~no_fit]
+
 n = len(tabarray)
-assert np.all(np.isfinite(tabarray[args.ra])) "Invalid values found in ra column!"
-assert np.all(np.isfinite(tabarray[args.dec])) "Invalid values found in dec column!"
-assert np.all(np.isfinite(tabarray[args.ra_cat])) "Invalid values found in ra_cat column!"
-assert np.all(np.isfinite(tabarray[args.dec_cat])) "Invalid values found in dec_cat column!"
+assert np.all(np.isfinite(tabarray[args.ra])), "Invalid values found in ra column!"
+assert np.all(np.isfinite(tabarray[args.dec])), "Invalid values found in dec column!"
+assert np.all(np.isfinite(tabarray[args.ra_cat])), "Invalid values found in ra_cat column!"
+assert np.all(np.isfinite(tabarray[args.dec_cat])), "Invalid values found in dec_cat column!"
 
 radec_p = SkyCoord(tabarray[args.ra]*u.deg, tabarray[args.dec]*u.deg)
 radec_q = SkyCoord(tabarray[args.ra_cat]*u.deg, tabarray[args.dec_cat]*u.deg)
