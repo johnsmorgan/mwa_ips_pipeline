@@ -54,7 +54,7 @@ topcat -stilts tmatch2 \
 	join=all1 \
 	ocmd="addcol complex !NULL_GroupID_1||!NULL_GroupID_1" \
 	ocmd='delcols "uuid_1 GroupID GroupSize GroupID_1 GroupSize_1"' \
-	ocmd='keepcols "ra err_ra dec err_dec peak_flux local_rms snr pbcor_norm ra_cat dec_cat Fp080 Fp162 Separation_cat complex GroupID GroupSize uuid"' \
+	ocmd='keepcols "ra err_ra dec err_dec peak_flux local_rms snr pbcor pbcor_norm ra_cat dec_cat Fp080 Fp162 Separation_cat complex GroupID GroupSize uuid"' \
 	out=${4} || topcat -stilts tpipe \
         in=${1%.vot}_cal.vot \
 	cmd="addcol complex false" \
