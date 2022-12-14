@@ -24,13 +24,16 @@ parser.add_argument('--background', default="background", help="Background (not 
 parser.add_argument('--flag_column', default="residual_mean", help="fit only where this column is flagged")
 parser.add_argument('--ofmt', default="votable", help="output file format")
 parser.add_argument('--overwrite', action='store_true', help="overwrite")
+parser.add_argument("--cutoff", dest="cutoff", default=5, help="remove sources with lower S/N")
 
 args = parser.parse_args()
 root, ext = os.path.splitext(args.infile)
 
 hdus = fits.open(args.infile)
-
 tab = Table.read(args.intable)
+snr = tab['peak_flux'] / tab['local_rms']
+tab = tab[snr > args.cutoff]
+
 wcs = WCS(hdus[0].header).celestial
 data = hdus[0].data
 

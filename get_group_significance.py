@@ -58,6 +58,8 @@ for g in range(t['GroupID'].min(), t['GroupID'].max()):
     likelihoods /= sum(likelihoods)
     t['p'][group_gt_thresh] = likelihoods
     idx = argsort(seps)
+    #if source_names[idx][0] == source_names[idx][1]:
+	    #t2['p_match1'][t2['GroupID'] == g] = likelihoods[idx][0] + likelihoods[idx][1] 
     t2['p_match1'][t2['GroupID'] == g] = likelihoods[idx][0]
     t2['name_match2'][t2['GroupID'] == g] = source_names[idx][1]
     t2['p_match2'][t2['GroupID'] == g] = likelihoods[idx][1]

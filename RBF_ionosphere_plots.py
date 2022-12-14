@@ -14,7 +14,7 @@ from numpy.linalg import norm
 from astropy.io import fits
 from astropy.table import Table
 from astropy.wcs import WCS
-from astropy.coordinates import Longitude, SkyCoord
+from astropy.coordinates import SkyCoord
 from astropy import units as u
 
 def transform_rbf(p, q, v, alpha=1):

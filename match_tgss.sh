@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 master=$2/TGSSADR1_7sigma_catalog.fits
+master=$2/tgss_adr1_fixed.fits
+master=$2/tgss_adr1_fixed2.fits
 
 # All contains all matches for all ips sources.
 # Any individual ips source may have zero or many matches.
@@ -68,7 +70,7 @@ topcat -stilts tmatch2 \
 	find=best1 \
 	join=all1 \
 	ocmd="delcols uuid_1" \
-	ocmd="addcol bad SepArcM_tgss>1.15||NULL_RA_tgss" \
+	ocmd="addcol bad SepArcM_tgss>1.15||NULL_RA_tgss||pbcor_norm<0.25" \
 	out=${1%.vot}_allips.vot
 
 topcat -stilts tpipe \
