@@ -49,7 +49,7 @@ if not opts.pol in POL_OPTIONS:
 if os.path.exists(args[2]):
     os.remove(args[2])
 
-imstack = ImageStack(args[0], freq='121-132')
+imstack = ImageStack(args[0], freq='121-132', image_type=None)
 dim_x, dim_y = imstack.group['beam'].shape[1:3]
 
 t = Table.read(args[1])

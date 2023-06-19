@@ -28,15 +28,15 @@ if not len(args) == 3:
 if os.path.exists(args[2]):
     os.remove(args[2])
 
-imstack = ImageStack(args[0], freq='121-132')
+imstack = ImageStack(args[0], freq='121-132', image_type=None)
 dim_x, dim_y = imstack.group['beam'].shape[1:3]
 
 t = Table.read(args[1])
 print(f"{len(t)} rows in master")
 
 print("calculating primary beam max")
-print(imstack.pix2beam(1200, 1200, scale=True))
 f = lambda x: -imstack.pix2beam(np.int_(np.round(x[0])), np.int_(np.round(x[1])), scale=True)
+b=f((1200.0, 1200.0))
 min_ = minimize(fun=f, x0=(1200.0, 1200.0), method='Nelder-Mead', options={'xatol': 1})
 pbmax = -min_['fun']
 
@@ -66,6 +66,7 @@ for s in np.argwhere(m & infield)[:, 0]:
     t["x"][s] = x[s]
     t["y"][s] = y[s]
     t["pbcor"][s] = imstack.pix2beam(int(np.round(x[s])), int(np.round(y[s])), scale=True)
+    print(t["pbcor"][s])
 
 print(f"{n_infield} in field")
 t["pbcor_norm"] = t["pbcor"] / pbmax
