@@ -10,16 +10,8 @@ Pipeline for automatic reduction of MWA IPS Data
 
 ## Catalogues needed
 - GLEAM
-- TGSS ADR 1
 - Callingham
-- MRC
 - VLSS
-
-## Run before first use of pipeline
-
-`gleam_ips_bands.sh` will produce a new GLEAM catalogue containing only the MWA IPS bands and flags for which category (if any) the source is in Callingham et al.
-
-`ips_continuum_cal.sh` will produce a catalog of all VLSS sources in area covered by VLSS (MRC elsewhere), removing any sources within 3 arcminutes of each other -- used for absolute flux calibration (not yet implemented) -- and correction of ionospheric refraction.
 
 ## Running the pipeline
 
