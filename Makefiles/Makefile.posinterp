@@ -1,0 +1,33 @@
+FREQ=121-132
+PIPELINE=~/Working/mwa_ips_pipeline
+CAT_PATH=/data/ips/catalogs/
+CONTINUUM=image
+VARIABILITY=image_moment2
+
+SH=/bin/bash
+PYTHON=python
+
+all: $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot
+################################
+# Tidy up catalogs 
+################################
+$(OBSID)_$(FREQ)_$(VARIABILITY).vot : $(OBSID)_beam.hdf5 $(OBSID)_$(FREQ)_$(VARIABILITY)_pos.vot
+	$(PYTHON) $(PIPELINE)/make_cat.py -m $(OBSID)_beam.hdf5 $(OBSID)_$(FREQ)_$(VARIABILITY)_pos.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot -o $(OBSID)
+
+$(OBSID)_$(FREQ)_$(CONTINUUM).vot : $(OBSID)_beam.hdf5 $(OBSID)_$(FREQ)-$(CONTINUUM)_mom2interp.vot
+	$(PYTHON) $(PIPELINE)/make_cat.py -i $(OBSID)_beam.hdf5 $(OBSID)_$(FREQ)-$(CONTINUUM)_mom2interp.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot -o $(OBSID)
+
+################################
+# Interp moment2
+################################
+$(OBSID)_$(FREQ)-$(CONTINUUM)_mom2interp.vot : $(OBSID)_$(FREQ)-$(CONTINUUM)_pos.vot $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID)_$(FREQ)_$(VARIABILITY)_bkg.fits $(OBSID)_$(FREQ)_$(VARIABILITY)_rms.fits
+	$(PYTHON) $(PIPELINE)/interp.py $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID)_$(FREQ)-$(CONTINUUM)_pos.vot $(OBSID)_$(FREQ)-$(CONTINUUM)_mom2interp.vot --overwrite
+
+################################
+# Interp Positions
+################################
+$(OBSID)_$(FREQ)_$(VARIABILITY)_pos.vot : $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot
+	$(PYTHON) $(PIPELINE)/interp_position.py  $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_pos.vot --overwrite
+
+$(OBSID)_$(FREQ)-$(CONTINUUM)_pos.vot : $(OBSID)_$(FREQ)-$(CONTINUUM).fits $(OBSID)_$(FREQ)-$(CONTINUUM)_comp.vot
+	$(PYTHON) $(PIPELINE)/interp_position.py $(OBSID)_$(FREQ)-$(CONTINUUM).fits $(OBSID)_$(FREQ)-$(CONTINUUM)_comp.vot $(OBSID)_$(FREQ)-$(CONTINUUM)_pos.vot --overwrite

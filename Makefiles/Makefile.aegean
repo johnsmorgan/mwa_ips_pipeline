@@ -1,0 +1,28 @@
+FREQ=121-132
+CONTINUUM=-image
+VARIABILITY=_image_moment2
+
+
+AEGEAN=aegean
+BANE=BANE
+
+#Aegean Settings (only need to capture strong sources so this could be set reasonably high)
+SEEDCLIP=5
+FLOODCLIP=4
+
+################################
+# Aegean
+################################
+
+$(OBSID)_$(FREQ)$(VARIABILITY)_comp.vot : $(OBSID)_$(FREQ)$(VARIABILITY).fits $(OBSID)_$(FREQ)$(VARIABILITY)_bkg.fits $(OBSID)_$(FREQ)$(VARIABILITY)_rms.fits
+	$(AEGEAN) --autoload --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)$(VARIABILITY).vot $(OBSID)_$(FREQ)$(VARIABILITY).fits
+
+$(OBSID)_$(FREQ)$(VARIABILITY)_bkg.fits : $(OBSID)_$(FREQ)$(VARIABILITY).fits
+	$(BANE) $(OBSID)_$(FREQ)$(VARIABILITY).fits
+
+$(OBSID)_$(FREQ)$(CONTINUUM)_comp.vot : $(OBSID)_$(FREQ)$(CONTINUUM).fits $(OBSID)_$(FREQ)$(CONTINUUM)_bkg.fits $(OBSID)_$(FREQ)$(CONTINUUM)_rms.fits
+	$(AEGEAN) --autoload --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)$(CONTINUUM).vot $(OBSID)_$(FREQ)$(CONTINUUM).fits
+
+$(OBSID)_$(FREQ)$(CONTINUUM)_bkg.fits : $(OBSID)_$(FREQ)$(CONTINUUM).fits
+	$(BANE) $(OBSID)_$(FREQ)$(CONTINUUM).fits
+

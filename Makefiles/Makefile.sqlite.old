@@ -1,0 +1,94 @@
+PIPELINE=~/Working/mwa_ips_pipeline
+FREQ=121-132
+PIPELINE=~/Working/mwa_ips_pipeline
+CAT_PATH=/data/ips/catalogs/
+CONTINUUM=image
+VARIABILITY=image_moment2
+
+SH=/bin/bash
+PYTHON=python
+AEGEAN=aegean
+BANE=BANE
+
+SQLITEDB=/data/ips/ips_phase2_dr1.sqlite
+hdf5_parameters != $(PYTHON) $(PIPELINE)/validate_imstack.py $(OBSID).hdf5
+scale_sigma != $(PYTHON) $(PIPELINE)/get_scale_sigma.py $(OBSID).hdf5
+
+#Aegean Settings (only need to capture strong sources so this could be set reasonably high)
+SEEDCLIP=5
+FLOODCLIP=4
+
+##############################
+## xmatch with TGSS
+#############################
+$(OBSID)_$(FREQ)_$(VARIABILITY)_tgss.vot : $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot
+	$(SH) $(PIPELINE)/match_tgss.sh $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot $(CAT_PATH)
+	$(PYTHON) $(PIPELINE)/get_group_significance.py $(OBSID)_$(FREQ)_$(VARIABILITY)_corr_all.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_corr_good.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss.vot | tee $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss.txt
+	$(PYTHON) $(PIPELINE)/obsdb/set_parameter.py --overwrite $(SQLITEDB) $(OBSID) moment2_tgss_matches $(shell $(PYTHON) $(PIPELINE)/count_lines.py $(OBSID)_$(FREQ)_$(VARIABILITY)_tgss.vot)
+
+##############################
+## add ionospheric corrections
+##############################
+$(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot : $(OBSID)_$(FREQ)_cal.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot
+	$(PYTHON) $(PIPELINE)/RBF_correct.py $(OBSID)_$(FREQ)_$(CONTINUUM)_cal.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot
+
+$(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot : $(OBSID)_$(FREQ)_cal.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot
+	$(PYTHON) $(PIPELINE)/RBF_correct.py $(OBSID)_$(FREQ)_cal.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot
+
+# ionospheric plots
+$(OBSID)_$(FREQ)_ionplot.png : $(OBSID)_$(FREQ)_cal.vot $(OBSID)_$(FREQ)_$(VARIABILITY).fits
+	$(PYTHON) $(PIPELINE)/RBF_ionosphere_plots.py $(OBSID)_$(FREQ)_cal.vot $(FREQ) $(OBSID)_$(FREQ)_$(VARIABILITY).fits .png 
+	$(SH) $(PIPELINE)/montage_ionplots.sh $(OBSID)
+
+#############################################
+## match with calibrator catalogue
+#############################################
+$(OBSID)_$(FREQ)_cal.vot : $(OBSID)_$(FREQ)_$(CONTINUUM).vot
+	$(SH) $(PIPELINE)/match_calibration.sh $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(CAT_PATH) $(FREQ) $(OBSID)_$(FREQ)_cal.vot
+
+# From this point upwards, hypen / underscore mess should be fixed.
+################################
+# Tidy up catalogs 
+################################
+$(OBSID)_$(FREQ)_$(VARIABILITY).vot : $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot
+	$(PYTHON) $(PIPELINE)/obsdb/set_parameter.py --overwrite $(SQLITEDB) $(OBSID) moment2_detections $(shell $(PYTHON) $(PIPELINE)/count_lines.py $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot)
+	$(PYTHON) $(PIPELINE)/make_cat.py -m $(OBSID).hdf5 $(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot -o $(OBSID)
+
+$(OBSID)_$(FREQ)_$(CONTINUUM).vot : $(OBSID)_$(FREQ)-$(CONTINUUM)_interp_comp.vot
+	$(PYTHON) $(PIPELINE)/make_cat.py -i $(OBSID).hdf5 $(OBSID)_$(FREQ)-$(CONTINUUM)_interp_comp.vot $(OBSID)_$(FREQ)_$(CONTINUUM).vot -o $(OBSID)
+
+################################
+# Interp 
+################################
+$(OBSID)_$(FREQ)-$(CONTINUUM)_interp_comp.vot : $(OBSID)_$(FREQ)-$(CONTINUUM)_comp.vot $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID)_$(FREQ)_$(VARIABILITY)_bkg.fits $(OBSID)_$(FREQ)_$(VARIABILITY)_rms.fits
+	$(PYTHON) $(PIPELINE)/obsdb/set_parameter.py --overwrite $(SQLITEDB) $(OBSID) continuum_detections $(shell $(PYTHON) $(PIPELINE)/count_lines.py $(OBSID)_$(FREQ)-$(CONTINUUM)_comp.vot)
+	$(PYTHON) $(PIPELINE)/interp.py $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID)_$(FREQ)-$(CONTINUUM)_comp.vot $(OBSID)_$(FREQ)-$(CONTINUUM)_interp_comp.vot --overwrite
+
+################################
+# Aegean
+################################
+$(OBSID)_$(FREQ)-$(CONTINUUM)_comp.vot : $(OBSID)_$(FREQ)-$(CONTINUUM).fits $(OBSID)_$(FREQ)-$(CONTINUUM)_bkg.fits $(OBSID)_$(FREQ)-$(CONTINUUM)_rms.fits
+	$(AEGEAN) --autoload --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)-$(CONTINUUM).vot $(OBSID)_$(FREQ)-$(CONTINUUM).fits
+
+$(OBSID)_$(FREQ)_$(VARIABILITY)_comp.vot : $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID)_$(FREQ)_$(VARIABILITY)_bkg.fits $(OBSID)_$(FREQ)_$(VARIABILITY)_rms.fits
+	$(AEGEAN) --autoload --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)_$(VARIABILITY).vot $(OBSID)_$(FREQ)_$(VARIABILITY).fits
+	
+################################
+# BANE
+################################
+$(OBSID)_$(FREQ)-$(CONTINUUM)_bkg.fits : $(OBSID)_$(FREQ)-$(CONTINUUM).fits $(OBSID).hdf5.validated
+	$(PYTHON) $(PIPELINE)/obsdb/set_parameter.py --overwrite $(SQLITEDB) $(OBSID) continuum_nan $(shell $(PYTHON) $(PIPELINE)/count_nans.py $(OBSID)_$(FREQ)-$(CONTINUUM).fits)
+	$(BANE) $(OBSID)_$(FREQ)-$(CONTINUUM).fits
+
+$(OBSID)_$(FREQ)_$(VARIABILITY)_bkg.fits : $(OBSID)_$(FREQ)_$(VARIABILITY).fits $(OBSID).hdf5.validated
+	$(PYTHON) $(PIPELINE)/obsdb/set_parameter.py --overwrite $(SQLITEDB) $(OBSID) moment2_nan $(shell $(PYTHON) $(PIPELINE)/count_nans.py $(OBSID)_$(FREQ)_$(VARIABILITY).fits)
+	$(BANE) $(OBSID)_$(FREQ)_$(VARIABILITY).fits
+
+###############################################################
+# Validate hdf5 file and write relevant data to sqlite database
+###############################################################
+
+$(OBSID).hdf5.validated : $(OBSID).hdf5
+	$(SH) $(PIPELINE)/obsdb/record_hdf5_params.sh $(OBSID) $(hdf5_parameters) $(SQLITEDB)
+	$(SH) $(PIPELINE)/obsdb/record_hdf5_params.sh $(OBSID) $(scale_sigma) $(SQLITEDB)
+	touch $(OBSID).hdf5.validated
