@@ -30,6 +30,7 @@ parser.add_option("-i", "--interp", dest="interp", action="store_true", help="Ca
 parser.add_option("-o", "--obsid", dest="obsid", default=None, help="time in gps format used for calculation of Sun location (default: first 10 letters of input.hdf5)")
 parser.add_option("--pol", dest="pol", default="I", help="primary beam polarisation to use: {} (default=%default)".format((", ".join(POL_OPTIONS))))
 parser.add_option("-m", "--moment2", dest="moment2", action="store_true", help="Calculate variability image parameters (dS etc)")
+parser.add_option("-c", "--cutoff", dest="cutoff", default=5, help="remove sources with lower S/N")
 
 opts, args = parser.parse_args()
 #FIXME add options for 
@@ -48,7 +49,7 @@ if not opts.pol in POL_OPTIONS:
 if os.path.exists(args[2]):
     os.remove(args[2])
 
-imstack = ImageStack(args[0], freq='121-132')
+imstack = ImageStack(args[0], freq='121-132', image_type=None)
 dim_x, dim_y = imstack.group['beam'].shape[1:3]
 
 t = Table.read(args[1])
@@ -62,6 +63,7 @@ sun = get_sun(time.utc)
 t['elongation'] = sun.separation(SkyCoord(t['ra'], t['dec'], unit = "deg"))
 
 t['snr'] = t['peak_flux'] / t['local_rms']
+t = t[t['snr'] > opts.cutoff]
 if opts.interp:
     t['snr_scint'] = t['peak_flux2'] / t['local_rms2']
 
