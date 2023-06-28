@@ -26,7 +26,7 @@ These catalogues are also available in the expected format at [pawsey data](http
 
 Copy makefiles into the working directory and edit as appropriate for naming conventions, and any other global variables at the top of the files that may need editing (e.g the catalogue directory).
 
-assuming that the image stack is names as [obsid].hdf5, the following code will loop over all obsids and run Makefiles as appropriate.
+assuming that the image stack is names as [obsid].hdf5, the following bash code will loop over all obsids and run Makefiles as appropriate.
 
 ```
 for imstack in ??????????.hdf5
