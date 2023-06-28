@@ -24,9 +24,9 @@ These catalogues are also available in the expected format at [pawsey data](http
 
 ## Running the pipeline
 
-Copy makefiles into the working directory and edit as appropriate for naming conventions, and any other global variables at the top of the files that may need editing (e.g the catalogue directory).
+Copy the Makefiles from the subdirectory of this pipeline into the working directory and edit as appropriate for naming conventions, and any other global variables at the top of the files that may need editing (e.g the catalogue directory, and the location of the pipeline scripts).
 
-assuming that the image stack is names as [obsid].hdf5, the following bash code will loop over all obsids and run Makefiles as appropriate.
+Assuming that the image stack is names as [obsid].hdf5, the following bash code will loop over all obsids and run Makefiles as appropriate.
 
 ```
 for imstack in ??????????.hdf5
