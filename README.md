@@ -8,7 +8,7 @@ Pipeline for automatic reduction of MWA IPS Data. The starting point is the foll
 For approximately 700 observations already processed, these data are available for team members at [pawsey data](https://data.pawsey.org.au) under the 'MWA Interplanetary Scintillation' project.
 
 ## Usage
-Please contact jmorgan before using / modifying this pipeline.
+Please contact John Morgan before using / modifying this pipeline.
 
 ## Pre-requisites
 - bash
