@@ -5,7 +5,7 @@ Pipeline for automatic reduction of MWA IPS Data. The starting point is the foll
 - `[obsid]_standard.fits` (a standard continuum image)
 - `[obsid]_moment2.fits` (a moment2 (variability) image).
 
-For approximately 700 observations already processed, these data are available for team members at [pawsey data](data.pawsey.org.au) under the 'MWA Interplanetary Scintillation' project.
+For approximately 700 observations already processed, these data are available for team members at [pawsey data](https://data.pawsey.org.au) under the 'MWA Interplanetary Scintillation' project.
 
 ## Pre-requisites
 - bash
@@ -20,7 +20,7 @@ For approximately 700 observations already processed, these data are available f
 - VLSS (main reference catalogue outside GLEAM coverage)
 - TGSSADR1 (astrometry reference catalogue)
 
-These catalogues are also available in the expected format at [pawsey data](data.pawsey.org.au).
+These catalogues are also available in the expected format at [pawsey data](https://data.pawsey.org.au).
 
 ## Running the pipeline
 
