@@ -2,6 +2,7 @@
 
 import os
 import argparse
+import logging
 
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
@@ -25,8 +26,17 @@ parser.add_argument('--flag_column', default="residual_mean", help="fit only whe
 parser.add_argument('--ofmt', default="votable", help="output file format")
 parser.add_argument('--overwrite', action='store_true', help="overwrite")
 parser.add_argument("--cutoff", dest="cutoff", default=5, help="remove sources with lower S/N")
+parser.add_argument("-v", "--verbose", action="count", dest="verbose", default=0, help="-v info, -vv debug")
 
 args = parser.parse_args()
+
+if args.verbose == 0:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.WARNING)
+elif args.verbose == 1:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.INFO)
+elif args.verbose > 1:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.DEBUG)
+
 root, ext = os.path.splitext(args.infile)
 
 hdus = fits.open(args.infile)
@@ -57,16 +67,15 @@ flag = np.zeros(len(x), dtype=int)
 vertices = np.array([[-np.sqrt(3)/4, -0.25], [0, 0.5], [np.sqrt(3)/4, -0.25]])
 
 for i in range(len(x)):
-    print(tab['uuid'][i], end=' ')
     if ~mask[i]:
         flag[i] = -1
-        print(f"err:{flag[i]} -- not masked -- skipping")
+        logging.info("%s err:%d -- not masked -- skipping", tab['uuid'][i], flag[i])
         continue
     s = (0, 0, slice(y[i]-1, y[i]+2), slice(x[i]-1, x[i]+2))
     d = data[s]
     if not d.shape == (3,3):
         flag[i] = 1
-        print(f"err:{flag[i]} -- invalid shape -- skipping")
+        logging.warning("%s err:%d -- invalid shape -- skipping", tab['uuid'][i], flag[i])
         continue
     interp = RectBivariateSpline(xx,xx,d, kx=2,ky=2)
     coords = (yf[i]-y[i], xf[i]-x[i])
@@ -75,15 +84,15 @@ for i in range(len(x)):
                     options={'xatol': 0.01, 'initial_simplex':vertices})
     if not min_['success']:
         flag[i] = 2
-        print(f"err:{flag[i]} -- fit failed in {min_['nit']} iterations --", min_['message'])
+        logging.warn("%s err:%d -- fit failed in %d iterations -- %s", tab['uuid'][i], flag[i], min_['nit'], min_['message'])
         continue
     peak_flux[i] = -min_['fun']
     y_out[i], x_out[i] = min_['x']
     if np.abs(x_out[i]) > 1 or np.abs(y_out[i]) > 1:
         flag[i] = 3
-        print(f"err:{flag[i]} -- interp position outside pixel at {x_out[i]},{y_out[i]}. {min_['nit']} iterations --", min_['message'])
+        logging.warning("%s err:%d -- interp position outside pixel at %d,%d. %d iterations -- %s", tab['uuid'][i], flag[i], x_out[i], y_out[i], min_['nit'], min_['message'])
     else:
-        print(f"err:{flag[i]} -- {min_['nit']} iterations --", min_['message'])
+        logging.debug("%s err:%d -- %d iterations -- %s", tab['uuid'][i], flag[i], min_['nit'], min_['message'])
 
 replace = mask & (flag == 0)
 xy = np.stack((x+x_out, y+y_out)).swapaxes(0, 1)
