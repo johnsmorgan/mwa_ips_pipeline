@@ -4,6 +4,7 @@ Generate a table containing sources suitable for an rubber-sheet IPS solution
 import sys
 import os
 import argparse
+import logging
 import numpy as np
 
 from numpy.linalg import norm
@@ -36,11 +37,19 @@ parser.add_argument('--dec_cat', default='dec_cat', help="Catalogued Dec column 
 parser.add_argument('--out_format', default='votable', help="output format (default: %(default)s)")
 parser.add_argument("--no_overwrite", dest='overwrite', action="store_false", help="don't overwrite an existing beam (overwrites by default)")
 parser.add_argument('--fit_col', default='err_ra', help="Column that is -1 if aegean didn't fully fit (default: %(default)s)")
+parser.add_argument("-v", "--verbose", action="count", dest="verbose", default=0, help="-v info, -vv debug")
 
 args = parser.parse_args()
 
 if not args.overwrite and os.path.exists(args.outtable):
     raise IOError("outtable exists")
+
+if args.verbose == 0:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.WARNING)
+elif args.verbose == 1:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.INFO)
+else:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.DEBUG)
 
 header = fits.open(args.infits)[0].header
 
@@ -49,7 +58,7 @@ tabarray = table.as_array()
 
 # remove sources that are not fit (pixel resolution accuracy only)
 no_fit = tabarray[args.fit_col] == -1.0
-print(f"{np.sum(no_fit)} / {len(tabarray)} with no aegean fit)")
+logging.info("%d/%d  with no aegean fit)", np.sum(no_fit), len(tabarray))
 tabarray = tabarray[~no_fit]
 table = table[~no_fit]
 

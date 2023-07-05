@@ -34,7 +34,7 @@ if args.verbose == 0:
     logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.WARNING)
 elif args.verbose == 1:
     logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.INFO)
-elif args.verbose > 1:
+else:
     logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.DEBUG)
 
 root, ext = os.path.splitext(args.infile)
