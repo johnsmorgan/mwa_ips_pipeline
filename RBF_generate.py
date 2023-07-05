@@ -81,7 +81,7 @@ p = np.stack((x_p, y_p), axis=-1)
 d = np.stack((x_q, y_q), axis=-1) - p
 
 outlier = get_outliers(p, d, 1.0/(60.0*abs(header['CDELT1']))) # outlier if 1arcmin offset at zenith
-print(f"{np.sum(outlier)}/{len(p)} outliers")
+logging.info(f"%d/%d outliers", np.sum(outlier), len(p))
 
 table['x'] = x_p
 table['y'] = y_p

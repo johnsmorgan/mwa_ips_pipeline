@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import logging
 import numpy as np
 from astropy.table import Table
 from astropy.time import Time
@@ -31,6 +32,7 @@ parser.add_option("-o", "--obsid", dest="obsid", default=None, help="time in gps
 parser.add_option("--pol", dest="pol", default="I", help="primary beam polarisation to use: {} (default=%default)".format((", ".join(POL_OPTIONS))))
 parser.add_option("-m", "--moment2", dest="moment2", action="store_true", help="Calculate variability image parameters (dS etc)")
 parser.add_option("-c", "--cutoff", dest="cutoff", default=5, help="remove sources with lower S/N")
+parser.add_option("-v", "--verbose", action="count", dest="verbose", default=0, help="-v info, -vv debug")
 
 opts, args = parser.parse_args()
 #FIXME add options for 
@@ -46,6 +48,14 @@ if opts.var and opts.interp:
     raise OptionValueError("-v/--variability can not be set with -i/--interp")
 if not opts.pol in POL_OPTIONS:
     raise OptionValueError("polarisation must be one of %s" % (", ".join(POL_OPTIONS)))
+
+if opts.verbose == 0:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.WARNING)
+elif opts.verbose == 1:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.INFO)
+else:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.DEBUG)
+
 if os.path.exists(args[2]):
     os.remove(args[2])
 
@@ -57,7 +67,7 @@ t = Table.read(args[1])
 # elongation
 if not opts.obsid:
     opts.obsid = args[0][:10]
-print("calculating elongations")
+logging.info("calculating elongations")
 time = Time(float(opts.obsid), format='gps')
 sun = get_sun(time.utc)
 t['elongation'] = sun.separation(SkyCoord(t['ra'], t['dec'], unit = "deg"))
@@ -67,13 +77,13 @@ t = t[t['snr'] > opts.cutoff]
 if opts.interp:
     t['snr_scint'] = t['peak_flux2'] / t['local_rms2']
 
-print("calculating primary beam max")
-print(imstack.pix2beam(1200, 1200, scale=True))
+logging.info("calculating primary beam max")
+logging.debug("beam at central pixel: %f", imstack.pix2beam(1200, 1200, scale=True))
 f = lambda x: -imstack.pix2beam(np.int_(np.round(x[0])), np.int_(np.round(x[1])), scale=True)
 min_ = minimize(fun=f, x0=(1200.0, 1200.0), method='Nelder-Mead', options={'xatol': 1})
 pbmax = -min_['fun']
 
-print("calculating primary beam for each source")
+logging.info("calculating primary beam for each source")
 t["pbcor"] = np.nan*np.ones(len(t))
 # loop over all unmasked values
 for s in np.argwhere(~t['ra'].mask)[:, 0]:
@@ -105,5 +115,5 @@ elif opts.interp:
 else:
     t.keep_columns(['ra', 'err_ra', 'dec', 'err_dec', 'a', 'b', 'pa', 'elongation', 'pbcor', 'pbcor_norm', 'uuid', 'peak_flux', 'background', 'local_rms', 'snr'])
 
-print("writing votable")
+logging.info("writing votable")
 t.write(args[2], format='votable')
