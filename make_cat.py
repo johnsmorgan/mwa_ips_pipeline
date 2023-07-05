@@ -26,13 +26,12 @@ parser = OptionParser(usage = "usage: %prog input.hdf5 input.vot output.vot" +
 
 add various columns and delete unneeded ones.
 """)
-parser.add_option("-v", "--variability", dest="var", action="store_true", help="Calculate variability image parameters (dS etc)")
-parser.add_option("-i", "--interp", dest="interp", action="store_true", help="Calculate interp image parameters (dS etc)")
+parser.add_option("-i", "--interp", dest="interp", action="store_true", help="Calculate interp image parameters (dS2, snr_scint etc)")
 parser.add_option("-o", "--obsid", dest="obsid", default=None, help="time in gps format used for calculation of Sun location (default: first 10 letters of input.hdf5)")
 parser.add_option("--pol", dest="pol", default="I", help="primary beam polarisation to use: {} (default=%default)".format((", ".join(POL_OPTIONS))))
 parser.add_option("-m", "--moment2", dest="moment2", action="store_true", help="Calculate variability image parameters (dS etc)")
 parser.add_option("-c", "--cutoff", dest="cutoff", default=5, help="remove sources with lower S/N")
-parser.add_option("-l", "--verbose", action="count", dest="verbose", default=0, help="-l info, -ll debug")
+parser.add_option("-v", "--verbose", action="count", dest="verbose", default=0, help="-l info, -ll debug")
 
 opts, args = parser.parse_args()
 #FIXME add options for 
@@ -44,8 +43,8 @@ opts, args = parser.parse_args()
 # variability
 # gpstime
 # set verbosity
-if opts.var and opts.interp:
-    raise OptionValueError("-v/--variability can not be set with -i/--interp")
+if opts.moment2 and opts.interp:
+    raise OptionValueError("-m/--moment2 can not be set with -i/--interp")
 if not opts.pol in POL_OPTIONS:
     raise OptionValueError("polarisation must be one of %s" % (", ".join(POL_OPTIONS)))
 
