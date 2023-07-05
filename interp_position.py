@@ -84,7 +84,7 @@ for i in range(len(x)):
                     options={'xatol': 0.01, 'initial_simplex':vertices})
     if not min_['success']:
         flag[i] = 2
-        logging.warn("%s err:%d -- fit failed in %d iterations -- %s", tab['uuid'][i], flag[i], min_['nit'], min_['message'])
+        logging.warning("%s err:%d -- fit failed in %d iterations -- %s", tab['uuid'][i], flag[i], min_['nit'], min_['message'])
         continue
     peak_flux[i] = -min_['fun']
     y_out[i], x_out[i] = min_['x']

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import argparse
+import logging
 import numpy as np
 from numpy.linalg import norm
 from astropy.io import fits
@@ -39,8 +40,19 @@ parser.add_argument('--outlier', default='outlier', help="Boolean column denotin
 parser.add_argument('--out_format', default='votable', help="output format (default: %(default)s)")
 parser.add_argument("--no_overwrite", dest='overwrite', action="store_false", help="don't overwrite an existing beam (overwrites by default)")
 parser.add_argument('--outformat', default="votable", help="output format (default: %(default)s)")
+parser.add_argument("-v", "--verbose", action="count", dest="verbose", default=0, help="-v info, -vv debug")
 
 args = parser.parse_args()
+
+if not args.overwrite and os.path.exists(args.outtable):
+    raise IOError("outtable exists")
+
+if args.verbose == 0:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.WARNING)
+elif args.verbose == 1:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.INFO)
+else:
+    logging.basicConfig(format='%(asctime)s-%(levelname)s %(message)s', level=logging.DEBUG)
 
 table = Table.read(args.cattable)
 tabarray = table.as_array()
@@ -51,8 +63,6 @@ wcs = WCS(header).celestial
 in_table = Table.read(args.intable)
 in_table_array = in_table.as_array()
 
-if not args.overwrite and os.path.exists(args.outtable):
-    raise IOError("outtable exists")
 
 # boolean flags
 vlss_complex = tabarray[args.complex]
@@ -60,7 +70,7 @@ outlier = tabarray[args.outlier]
 # classify by beam
 h = tabarray[args.beam] > args.beam_cutoff
 fit = ~vlss_complex & ~outlier & h
-print(f"{np.sum(fit)}/{len(fit)} sources from input catalogue selected for fit")
+logging.info("%d/%d sources from input catalogue selected for fit", np.sum(fit), len(fit))
 
 p = np.stack((tabarray['x'][fit], tabarray['y'][fit]), axis=-1)
 q = np.stack((tabarray['x_cat'][fit], tabarray['y_cat'][fit]), axis=-1)

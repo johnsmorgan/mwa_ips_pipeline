@@ -58,7 +58,7 @@ tabarray = table.as_array()
 
 # remove sources that are not fit (pixel resolution accuracy only)
 no_fit = tabarray[args.fit_col] == -1.0
-logging.info("%d/%d  with no aegean fit)", np.sum(no_fit), len(tabarray))
+logging.info("%d/%d  with no aegean fit", np.sum(no_fit), len(tabarray))
 tabarray = tabarray[~no_fit]
 table = table[~no_fit]
 
@@ -81,7 +81,7 @@ p = np.stack((x_p, y_p), axis=-1)
 d = np.stack((x_q, y_q), axis=-1) - p
 
 outlier = get_outliers(p, d, 1.0/(60.0*abs(header['CDELT1']))) # outlier if 1arcmin offset at zenith
-logging.info(f"%d/%d outliers", np.sum(outlier), len(p))
+logging.info("%d/%d outliers", np.sum(outlier), len(p))
 
 table['x'] = x_p
 table['y'] = y_p
