@@ -9,7 +9,7 @@ VARIABILITY=image_moment2
 SH=/bin/bash
 PYTHON=python
 
-all: $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot $(OBSID)_$(FREQ)_ionplot.png 
+IONOSPHERE_CORRECTIONS : $(OBSID)_$(FREQ)_$(CONTINUUM)_corr.vot $(OBSID)_$(FREQ)_$(VARIABILITY)_corr.vot $(OBSID)_$(FREQ)_ionplot.png 
 
 ##############################
 ## add ionospheric corrections

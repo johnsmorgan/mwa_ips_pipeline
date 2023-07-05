@@ -9,7 +9,7 @@ SUFFIX=gleam
 RA=RAJ2000
 DE=DEJ2000
 
-GLEAM_TARGET : $(OBSID)_$(SUFFIX)_digest.fits $(OBSID)_no_$(SUFFIX).vot $(OBSID)_no_$(SUFFIX)_moment2.vot
+GLEAM_TARGETS : $(OBSID)_$(SUFFIX)_digest.fits $(OBSID)_no_$(SUFFIX).vot $(OBSID)_no_$(SUFFIX)_moment2.vot
 
 $(OBSID)_${SUFFIX}_digest.fits : $(OBSID)_$(SUFFIX).vot 
 	$(SH) $(PIPELINE)/make_digest.sh  $(OBSID)_$(SUFFIX).vot $(OBSID)_${SUFFIX}_digest.fits

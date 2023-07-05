@@ -7,7 +7,7 @@ VARIABILITY=image_moment2
 SH=/bin/bash
 PYTHON=python
 
-all: $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot
+INTERPOLATED_CATALOGS : $(OBSID)_$(FREQ)_$(CONTINUUM).vot $(OBSID)_$(FREQ)_$(VARIABILITY).vot
 ################################
 # Tidy up catalogs 
 ################################

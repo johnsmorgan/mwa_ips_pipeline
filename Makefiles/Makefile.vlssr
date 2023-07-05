@@ -14,7 +14,7 @@ A=MAJOR_AXIS
 B=MINOR_AXIS
 PA=POSITION_ANGLE
 
-VLSSR_TARGET : $(OBSID)_$(SUFFIX2)_digest.fits $(OBSID)_no_$(SUFFIX)_$(SUFFIX2).fits $(OBSID)_no_$(SUFFIX)_$(SUFFIX2)_moment2.fits $(OBSID)_nomatch_double.fits
+VLSSR_TARGETS : $(OBSID)_$(SUFFIX2)_digest.fits $(OBSID)_no_$(SUFFIX)_$(SUFFIX2).fits $(OBSID)_no_$(SUFFIX)_$(SUFFIX2)_moment2.fits $(OBSID)_nomatch_double.fits
 
 $(OBSID)_$(SUFFIX2)_digest.fits : $(OBSID)_$(SUFFIX2).vot 
 	$(SH) $(PIPELINE)/make_digest_vlssr.sh  $(OBSID)_$(SUFFIX2).vot $(OBSID)_${SUFFIX2}_digest.fits

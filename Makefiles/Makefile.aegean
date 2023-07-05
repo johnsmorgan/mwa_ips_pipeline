@@ -2,7 +2,6 @@ FREQ=121-132
 CONTINUUM=-image
 VARIABILITY=_image_moment2
 
-
 AEGEAN=aegean
 BANE=BANE
 
@@ -13,6 +12,7 @@ FLOODCLIP=4
 ################################
 # Aegean
 ################################
+AEGEAN_TABLES : $(OBSID)_$(FREQ)$(VARIABILITY)_comp.vot $(OBSID)_$(FREQ)$(CONTINUUM)_comp.vot
 
 $(OBSID)_$(FREQ)$(VARIABILITY)_comp.vot : $(OBSID)_$(FREQ)$(VARIABILITY).fits $(OBSID)_$(FREQ)$(VARIABILITY)_bkg.fits $(OBSID)_$(FREQ)$(VARIABILITY)_rms.fits
 	$(AEGEAN) --autoload --seedclip=$(SEEDCLIP) --floodclip=$(FLOODCLIP) --table $(OBSID)_$(FREQ)$(VARIABILITY).vot $(OBSID)_$(FREQ)$(VARIABILITY).fits
